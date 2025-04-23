@@ -13,6 +13,8 @@ toc: false
 	<div class="card">
 		<h3>Map controls</h3>
 		${map_control_input}
+    <h3>Manual scroll / zoom ${map_control.ward.id !== "manual" ? '(set “ward” to “Manual” to enable)' : ''}</h3>
+    ${manual_map_control_input}
 	</div>
 </div>
 
@@ -76,22 +78,6 @@ stops_summary
 
 ```js
 const map_control_input = Inputs.form({
-  // D3 and Plot expect coordinates to be specified as [longitude, latitude], so if you're setting your center point by grabbing coordinates from Google Maps, you'll need to reverse them.
-  zoom: Inputs.range([0.025, 0.3], {
-    value: 0.1,
-    step: 0.025,
-    label: "zoom"
-  }),
-  scroll_horizontal: Inputs.range([-0.4, 0.4], {
-    value: 0,
-    step: 0.025,
-    label: "horizontal scroll (lat)"
-  }),
-  scroll_vertical: Inputs.range([-0.25, 0.2], {
-    value: 0,
-    step: 0.025,
-    label: "vertical scroll (lon)"
-  }),
   ward: Inputs.select([
       {
         id: "city",
@@ -108,9 +94,35 @@ const map_control_input = Inputs.form({
     label: "ward",
     format: (ward) => `${ward.name} (${ward.number})`
   }),
+  
   roads: Inputs.range([0, 5], {value: 3, label: "Roads (level of maintenance)", step: 1})
 })
 const map_control = Generators.input(map_control_input)
+```
+
+```js
+const manual_map_control_input = Inputs.form({
+  // D3 and Plot expect coordinates to be specified as [longitude, latitude], so if you're setting your center point by grabbing coordinates from Google Maps, you'll need to reverse them.
+  zoom: Inputs.range([0.025, 0.3], {
+    value: 0.1,
+    step: 0.025,
+    label: "zoom",
+    disabled: map_control.ward.id !== "manual"
+  }),
+  scroll_horizontal: Inputs.range([-0.4, 0.4], {
+    value: 0,
+    step: 0.025,
+    label: "horizontal scroll (lat)",
+    disabled: map_control.ward.id !== "manual"
+  }),
+  scroll_vertical: Inputs.range([-0.25, 0.2], {
+    value: 0,
+    step: 0.025,
+    label: "vertical scroll (lon)",
+    disabled: map_control.ward.id !== "manual"
+  })
+})
+const manual_map_control = Generators.input(manual_map_control_input)
 ```
 
 ```js
@@ -139,7 +151,7 @@ const get_map_domain = () => {
   }
 
   if (map_control.ward.id === "manual") {
-    return d3.geoCircle().center([-75.689515 + map_control.scroll_horizontal, 45.383611 + map_control.scroll_vertical]).radius(map_control.zoom)()
+    return d3.geoCircle().center([-75.689515 + manual_map_control.scroll_horizontal, 45.383611 + manual_map_control.scroll_vertical]).radius(manual_map_control.zoom)()
   }
 
   return map_control.ward.geometry
@@ -152,8 +164,6 @@ const viewer_plot = Plot.plot({
   title: "Transit stops in Ottawa",
   projection: {
     type: "reflect-y",
-    // domain: d3.geoCircle().center([-75.689515 + map_control.scroll_horizontal, 45.383611 + map_control.scroll_vertical]).radius(map_control.zoom)(),
-    // inset: 2
     domain: get_map_domain(),
     inset: 10
   },
@@ -224,8 +234,8 @@ const viewer_plot = Plot.plot({
         r: (d) => d.n_stops_new,
         stroke: "currentColor",
         fill: "black",
-        strokeWidth: (map_control.zoom <= 0.05) ? 0.2 : 0.01,
-        strokeOpacity: (map_control.zoom <= 0.05) ? 1 : 0.5,
+        strokeWidth: (manual_map_control.zoom <= 0.05) ? 0.2 : 0.01,
+        strokeOpacity: (manual_map_control.zoom <= 0.05) ? 1 : 0.5,
         channels: {
           Name: d => d.stop_name_normalized,
           "Stop code": d => d.stop_code,
@@ -253,8 +263,8 @@ const viewer_plot = Plot.plot({
         // fill: d => Math.round(d.pct_stops_difference * 1000) / 10,
         fill: "ranking",
         fillOpacity: 0.9,
-        strokeWidth: (map_control.zoom <= 0.05) ? 0.2 : 0.01,
-        strokeOpacity: (map_control.zoom <= 0.05) ? 1 : 0.5
+        strokeWidth: (manual_map_control.zoom <= 0.05) ? 0.2 : 0.01,
+        strokeOpacity: (manual_map_control.zoom <= 0.05) ? 1 : 0.5
       }
     ),
     Plot.dot(
@@ -267,8 +277,8 @@ const viewer_plot = Plot.plot({
         // fill: "n_stops_difference",
         fill: "ranking",
         fillOpacity: 0.9,
-        strokeWidth: (map_control.zoom <= 0.05) ? 0.2 : 0.01,
-        strokeOpacity: (map_control.zoom <= 0.05) ? 1 : 0.5
+        strokeWidth: (manual_map_control.zoom <= 0.05) ? 0.2 : 0.01,
+        strokeOpacity: (manual_map_control.zoom <= 0.05) ? 1 : 0.5
       }
     )
   ]
@@ -291,8 +301,6 @@ const stop_times_plot = Plot.plot({
   title: "Transit stops in Ottawa",
   projection: {
     type: "reflect-y",
-    // domain: d3.geoCircle().center([-75.689515 + map_control.scroll_horizontal, 45.383611 + map_control.scroll_vertical]).radius(map_control.zoom)(),
-    // inset: 2
     domain: get_map_domain(),
     inset: 10
   },
