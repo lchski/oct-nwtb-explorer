@@ -16,8 +16,8 @@ toc: false
 	</div>
 </div>
 
-There are ${stops_summary.total.n.toLocaleString()} stops in the dataset. For the service details selected:
-- the current schedule services ${stops_summary.current.n.toLocaleString()}
+For the selected options:
+- the current schedule services ${stops_summary.current.n.toLocaleString()} stops
 - the new schedule will service ${stops_summary.new.n.toLocaleString()} (${ch_incr_decr(stops_summary.new.change, true)}${Math.abs(stops_summary.new.change).toLocaleString()})
 
 ```js
@@ -269,6 +269,93 @@ viewer_plot.addEventListener('input', (e) => {
 viewer_plot
 ```
 
+```js
+const stop_times_plot = Plot.plot({
+  width: Math.max(width, 550),
+  title: "Transit stops in Ottawa",
+  projection: {
+    type: "reflect-y",
+    // domain: d3.geoCircle().center([-75.689515 + map_control.scroll_horizontal, 45.383611 + map_control.scroll_vertical]).radius(map_control.zoom)(),
+    // inset: 2
+    domain: (map_control.ward.id === "city") 
+      ? d3.geoCircle().center([-75.689515 + map_control.scroll_horizontal, 45.383611 + map_control.scroll_vertical]).radius(map_control.zoom)()
+      : map_control.ward.geometry,
+    inset: 10
+  },
+  color: {
+    // type: "quantile",
+    // n: 6,
+    type: "diverging",
+    pivot: 0,
+    scheme: "RdBu",
+    legend: true
+  },
+  marks: [
+    Plot.geo(
+      wards,
+      {
+        strokeWidth: 0.3
+      }
+    ),
+    (map_control.ward.id === "city") ? null : Plot.geo(
+      map_control.ward.geometry,
+      {
+        fill: "currentColor",
+        fillOpacity: 0.02
+      }
+    ),
+    Plot.geo(
+      ons_neighbourhoods,
+      {
+        strokeWidth: 0.2
+      }
+    ),
+    Plot.geo(
+      ({
+        type: roads.type,
+        crs: roads.crs,
+        features: roads.features.filter((road) => road.properties.MAINTCLASS <= level_of_detail.roads) // adjust on this or other criteria to control how many roads get rendered
+      }),
+      {
+        strokeWidth: 0.15
+      }
+    ),
+    Plot.geo(
+      ons_neighbourhoods,
+      Plot.centroid({
+        tip: false,
+        channels: {
+          "Neighbourhood": (d) => d.properties.Name,
+          "Population (approx)": (d) => d.properties.POPEST.toLocaleString(),
+          "ONS ID": (d) => d.properties.ONS_ID
+        },
+        strokeOpacity: 0
+      })
+    ),
+    Plot.density(
+      stops_reranked, {
+        color: {
+          type: "diverging"
+        },
+        x: "stop_lon_normalized",
+        y: "stop_lat_normalized",
+        // weight: (d) => d.ranking,
+        weight: (d) => d.n_stops_difference,
+        bandwidth: 25,
+        fill: "density",
+        opacity: 0.5
+      }
+    ),
+    // Plot.dot(stop_times, Plot.dodgeX({x: "stop_lon_normalized", y: "stop_lat_normalized"}))
+    Plot.dot(stop_times, Plot.hexbin({r: "count"}, {x: "stop_lon_normalized", y: "stop_lat_normalized"}))
+    // Plot.contour(stop_times, {x: "stop_lon_normalized", y: "stop_lat_normalized", fill: "count"})
+  ]
+})
+```
+
+```js
+stop_times_plot
+```
 
 <!-- ## Data / loading -->
 
@@ -327,12 +414,72 @@ SELECT
 	END AS ranking
 FROM base_query
 ORDER BY ranking DESC`)]
+
+const stops_reranked = [...await octdb.query(`
+WITH stop_frequencies AS (
+  SELECT 
+    stop_code,
+    SUM(CASE WHEN source = 'current' THEN n_stop_times ELSE 0 END)::INTEGER AS current,
+    SUM(CASE WHEN source = 'new' THEN n_stop_times ELSE 0 END)::INTEGER AS new
+  FROM stop_times_by_stop
+  WHERE 
+    list_contains(${array_to_sql_qry_array(selected_service_windows)}, service_window) AND
+    list_contains(${array_to_sql_qry_array(selected_service_ids)}, service_id)
+  GROUP BY stop_code
+),
+stop_frequencies_all AS (
+  SELECT 
+    stop_code,
+    SUM(CASE WHEN source = 'current' THEN n_stop_times ELSE 0 END)::INTEGER AS current_all
+  FROM stop_times_by_stop
+  GROUP BY stop_code
+),
+base_query AS (
+  SELECT 
+    s.*,
+    COALESCE(sf.current, 0) AS n_stops_current,
+    COALESCE(sf.new, 0) AS n_stops_new,
+    n_stops_new - n_stops_current AS n_stops_difference,
+    n_stops_difference::FLOAT / NULLIF(n_stops_current::FLOAT, 0) AS pct_stops_difference,
+    CASE WHEN n_stops_current = 0 THEN TRUE ELSE FALSE END AS is_new_stop,
+    CASE WHEN COALESCE(sfa.current_all, 0) = 0 THEN TRUE ELSE FALSE END AS is_entirely_new_stop
+  FROM stops s
+  LEFT JOIN stop_frequencies sf USING(stop_code)
+  LEFT JOIN stop_frequencies_all sfa USING(stop_code)
+)
+SELECT 
+  *,
+  CASE 
+    WHEN is_new_stop THEN 
+      DENSE_RANK() OVER (PARTITION BY is_new_stop ORDER BY n_stops_difference ASC)
+    ELSE 
+      CASE 
+        WHEN pct_stops_difference > 0 THEN 
+          DENSE_RANK() OVER (PARTITION BY is_new_stop, pct_stops_difference >= 0 ORDER BY pct_stops_difference ASC)
+        WHEN pct_stops_difference = 0 THEN
+          0
+        ELSE 
+          -DENSE_RANK() OVER (PARTITION BY is_new_stop, pct_stops_difference < 0 ORDER BY pct_stops_difference DESC)
+      END
+  END AS ranking
+FROM base_query
+ORDER BY ranking DESC;
+`)]
+
+const stop_times = [...await octdb.query(`
+SELECT *
+FROM stop_times
+WHERE
+  list_contains(${array_to_sql_qry_array(selected_service_windows)}, service_window) AND
+  list_contains(${array_to_sql_qry_array(selected_service_ids)}, service_id)
+`)]
 ```
 
 ```js
 const octdb = DuckDBClient.of({
 	stops: FileAttachment("./data/octranspo.com/stops_normalized.parquet"),
 	stop_times_by_stop: FileAttachment("./data/octranspo.com/stop_times_by_stop.parquet"),
+  stop_times: FileAttachment("./data/octranspo.com/stop_times.parquet"),
 })
 ```
 
