@@ -333,7 +333,7 @@ const stop_times_plot = Plot.plot({
       })
     ),
     Plot.density(
-      stops_reranked, {
+      stops, {
         color: {
           type: "diverging"
         },
@@ -414,57 +414,6 @@ SELECT
 	END AS ranking
 FROM base_query
 ORDER BY ranking DESC`)]
-
-const stops_reranked = [...await octdb.query(`
-WITH stop_frequencies AS (
-  SELECT 
-    stop_code,
-    SUM(CASE WHEN source = 'current' THEN n_stop_times ELSE 0 END)::INTEGER AS current,
-    SUM(CASE WHEN source = 'new' THEN n_stop_times ELSE 0 END)::INTEGER AS new
-  FROM stop_times_by_stop
-  WHERE 
-    list_contains(${array_to_sql_qry_array(selected_service_windows)}, service_window) AND
-    list_contains(${array_to_sql_qry_array(selected_service_ids)}, service_id)
-  GROUP BY stop_code
-),
-stop_frequencies_all AS (
-  SELECT 
-    stop_code,
-    SUM(CASE WHEN source = 'current' THEN n_stop_times ELSE 0 END)::INTEGER AS current_all
-  FROM stop_times_by_stop
-  GROUP BY stop_code
-),
-base_query AS (
-  SELECT 
-    s.*,
-    COALESCE(sf.current, 0) AS n_stops_current,
-    COALESCE(sf.new, 0) AS n_stops_new,
-    n_stops_new - n_stops_current AS n_stops_difference,
-    n_stops_difference::FLOAT / NULLIF(n_stops_current::FLOAT, 0) AS pct_stops_difference,
-    CASE WHEN n_stops_current = 0 THEN TRUE ELSE FALSE END AS is_new_stop,
-    CASE WHEN COALESCE(sfa.current_all, 0) = 0 THEN TRUE ELSE FALSE END AS is_entirely_new_stop
-  FROM stops s
-  LEFT JOIN stop_frequencies sf USING(stop_code)
-  LEFT JOIN stop_frequencies_all sfa USING(stop_code)
-)
-SELECT 
-  *,
-  CASE 
-    WHEN is_new_stop THEN 
-      DENSE_RANK() OVER (PARTITION BY is_new_stop ORDER BY n_stops_difference ASC)
-    ELSE 
-      CASE 
-        WHEN pct_stops_difference > 0 THEN 
-          DENSE_RANK() OVER (PARTITION BY is_new_stop, pct_stops_difference >= 0 ORDER BY pct_stops_difference ASC)
-        WHEN pct_stops_difference = 0 THEN
-          0
-        ELSE 
-          -DENSE_RANK() OVER (PARTITION BY is_new_stop, pct_stops_difference < 0 ORDER BY pct_stops_difference DESC)
-      END
-  END AS ranking
-FROM base_query
-ORDER BY ranking DESC;
-`)]
 
 const stop_times = [...await octdb.query(`
 SELECT *
