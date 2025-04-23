@@ -314,7 +314,7 @@ const stop_times_plot = Plot.plot({
       ({
         type: roads.type,
         crs: roads.crs,
-        features: roads.features.filter((road) => road.properties.MAINTCLASS <= level_of_detail.roads) // adjust on this or other criteria to control how many roads get rendered
+        features: roads.features.filter((road) => road.properties.MAINTCLASS <= map_control.roads) // adjust on this or other criteria to control how many roads get rendered
       }),
       {
         strokeWidth: 0.15
