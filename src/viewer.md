@@ -52,24 +52,7 @@ stops_summary = {
 ```
 
 ```js
-// NB: does one decimal
-const to_pct = (frac) => Math.round(frac * 1000) / 10
-
-const ch_incr_decr = (n, symbol = false) => {
-	if (symbol) {
-		if (n === 0) return '='
-
-		if (n > 0) return '+'
-
-		return '-'
-	}
-
-	if (n === 0) return 'change'
-
-	if (n > 0) return 'increase'
-
-	return 'decrease'
-}
+import {to_pct, ch_incr_decr} from './lib/helpers.js'
 ```
 
 ```js
@@ -144,18 +127,9 @@ const level_of_detail_input = Inputs.form({
 const level_of_detail = Generators.input(level_of_detail_input)
 ```
 
+
 ```js
-const get_map_domain = () => {
-  if (map_control.ward.id === "city") {
-    return city_limits
-  }
-
-  if (map_control.ward.id === "manual") {
-    return d3.geoCircle().center([-75.689515 + manual_map_control.scroll_horizontal, 45.383611 + manual_map_control.scroll_vertical]).radius(manual_map_control.zoom)()
-  }
-
-  return map_control.ward.geometry
-}
+import {plot_basemap_components, get_map_domain} from './lib/maps.js'
 ```
 
 ```js
@@ -164,7 +138,7 @@ const viewer_plot = Plot.plot({
   title: "Transit stops in Ottawa",
   projection: {
     type: "reflect-y",
-    domain: get_map_domain(),
+    domain: get_map_domain({ map_control, manual_map_control, city_limits }),
     inset: 10
   },
   color: {
@@ -173,47 +147,7 @@ const viewer_plot = Plot.plot({
     legend: true
   },
   marks: [
-    Plot.geo(
-      wards,
-      {
-        strokeWidth: 0.3
-      }
-    ),
-    (map_control.ward.id === "city" || map_control.ward.id === "manual") ? null : Plot.geo(
-      map_control.ward.geometry,
-      {
-        fill: "currentColor",
-        fillOpacity: 0.02
-      }
-    ),
-    Plot.geo(
-      ons_neighbourhoods,
-      {
-        strokeWidth: 0.2
-      }
-    ),
-    Plot.geo(
-      ({
-        type: roads.type,
-        crs: roads.crs,
-        features: roads.features.filter((road) => road.properties.MAINTCLASS <= map_control.roads) // adjust on this or other criteria to control how many roads get rendered
-      }),
-      {
-        strokeWidth: 0.15
-      }
-    ),
-    Plot.geo(
-      ons_neighbourhoods,
-      Plot.centroid({
-        tip: false,
-        channels: {
-          "Neighbourhood": (d) => d.properties.Name,
-          "Population (approx)": (d) => d.properties.POPEST.toLocaleString(),
-          "ONS ID": (d) => d.properties.ONS_ID
-        },
-        strokeOpacity: 0
-      })
-    ),
+    ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control }),
     // Plot.density(
     //   stops, {
     //     color: {
@@ -301,7 +235,7 @@ const stop_times_plot = Plot.plot({
   title: "Transit stops in Ottawa",
   projection: {
     type: "reflect-y",
-    domain: get_map_domain(),
+    domain: get_map_domain({ map_control, manual_map_control, city_limits }),
     inset: 10
   },
   color: {
@@ -313,47 +247,7 @@ const stop_times_plot = Plot.plot({
     legend: true
   },
   marks: [
-    Plot.geo(
-      wards,
-      {
-        strokeWidth: 0.3
-      }
-    ),
-    (map_control.ward.id === "city" || map_control.ward.id === "manual") ? null : Plot.geo(
-      map_control.ward.geometry,
-      {
-        fill: "currentColor",
-        fillOpacity: 0.02
-      }
-    ),
-    Plot.geo(
-      ons_neighbourhoods,
-      {
-        strokeWidth: 0.2
-      }
-    ),
-    Plot.geo(
-      ({
-        type: roads.type,
-        crs: roads.crs,
-        features: roads.features.filter((road) => road.properties.MAINTCLASS <= map_control.roads) // adjust on this or other criteria to control how many roads get rendered
-      }),
-      {
-        strokeWidth: 0.15
-      }
-    ),
-    Plot.geo(
-      ons_neighbourhoods,
-      Plot.centroid({
-        tip: false,
-        channels: {
-          "Neighbourhood": (d) => d.properties.Name,
-          "Population (approx)": (d) => d.properties.POPEST.toLocaleString(),
-          "ONS ID": (d) => d.properties.ONS_ID
-        },
-        strokeOpacity: 0
-      })
-    ),
+    ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control }),
     Plot.density(
       stops, {
         color: {
