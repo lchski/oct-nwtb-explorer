@@ -126,19 +126,6 @@ const viewer_plot = Plot.plot({
   },
   marks: [
     ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control }),
-    // Plot.density(
-    //   stops, {
-    //     color: {
-    //       type: "diverging"
-    //     },
-    //     x: "stop_lon_normalized",
-    //     y: "stop_lat_normalized",
-    //     weight: (d) => d.ranking,
-    //     bandwidth: 25,
-    //     fill: "density",
-    //     opacity: 0.5
-    //   }
-    // ),
     Plot.dot(// combines new and existing stops to provide the pointer details
       (level_of_detail.only_new_stops) ? stops.filter(stop => stop.is_entirely_new_stop) : stops, Plot.pointer({
         x: "stop_lon_normalized",
@@ -195,12 +182,6 @@ const viewer_plot = Plot.plot({
     )
   ]
 })
-
-viewer_plot.addEventListener('input', (e) => {
-	console.log("stop selected")
-	console.log(viewer_plot.value)
-	console.log(e.target)
-})
 ```
 
 ```js
@@ -211,6 +192,7 @@ viewer_plot
 const stop_times_plot = Plot.plot({
   width: Math.max(width, 550),
   title: "Transit stops in Ottawa",
+  subtitle: "Hexagon size indicates how many times buses stop in a given area with the new schedule, based on all the stops in the area. Blurred colour indicates (roughly) the degree of change for that area, comparing the old schedule to the new one. (Blurred colour does an odd thing in the west end, due to outliers—sorry!)",
   projection: {
     type: "reflect-y",
     domain: get_map_domain({ map_control, manual_map_control, city_limits }),
@@ -226,38 +208,8 @@ const stop_times_plot = Plot.plot({
   },
   marks: [
     ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control }),
-    // Plot.density(
-    //   stops, {
-    //     color: {
-    //       type: "diverging"
-    //     },
-    //     x: "stop_lon_normalized",
-    //     y: "stop_lat_normalized",
-    //     // weight: (d) => d.ranking,
-    //     weight: (d) => d.n_stops_difference,
-    //     bandwidth: 25,
-    //     fill: "density",
-    //     opacity: 0.5
-    //   }
-    // ),
-    // Plot.density(
-    //   stop_times, {
-    //     color: {
-    //       type: "diverging"
-    //     },
-    //     x: "stop_lon_normalized",
-    //     y: "stop_lat_normalized",
-    //     // weight: (d) => d.source === 'new' ? 1 : -1,
-    //     // weight: "count",
-    //     // bandwidth: 25,
-    //     fill: "density",
-    //     opacity: 0.5
-    //   }
-    // ),
-    // Plot.raster(stops, {x: "stop_lon_normalized", y: "stop_lat_normalized", fill: "pct_stops_difference", interpolate: "barycentric", blur: 10, opacity: 0.5}),
     Plot.raster(stops, {x: "stop_lon_normalized", y: "stop_lat_normalized", fill: "ranking", interpolate: "barycentric", blur: 10, opacity: 0.5}),
-    Plot.dot(stop_times, Plot.hexbin({r: "count"}, {x: "stop_lon_normalized", y: "stop_lat_normalized"}))
-    // Plot.contour(stop_times, {x: "stop_lon_normalized", y: "stop_lat_normalized", fill: "count"})
+    Plot.dot(stop_times.filter(d => d.source === 'new'), Plot.hexbin({r: "count"}, {x: "stop_lon_normalized", y: "stop_lat_normalized", opacity: 0.5}))
   ]
 })
 ```
