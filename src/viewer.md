@@ -248,21 +248,36 @@ const stop_times_plot = Plot.plot({
   },
   marks: [
     ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control }),
-    Plot.density(
-      stops, {
-        color: {
-          type: "diverging"
-        },
-        x: "stop_lon_normalized",
-        y: "stop_lat_normalized",
-        // weight: (d) => d.ranking,
-        weight: (d) => d.n_stops_difference,
-        bandwidth: 25,
-        fill: "density",
-        opacity: 0.5
-      }
-    ),
-    // Plot.dot(stop_times, Plot.dodgeX({x: "stop_lon_normalized", y: "stop_lat_normalized"}))
+    // Plot.density(
+    //   stops, {
+    //     color: {
+    //       type: "diverging"
+    //     },
+    //     x: "stop_lon_normalized",
+    //     y: "stop_lat_normalized",
+    //     // weight: (d) => d.ranking,
+    //     weight: (d) => d.n_stops_difference,
+    //     bandwidth: 25,
+    //     fill: "density",
+    //     opacity: 0.5
+    //   }
+    // ),
+    // Plot.density(
+    //   stop_times, {
+    //     color: {
+    //       type: "diverging"
+    //     },
+    //     x: "stop_lon_normalized",
+    //     y: "stop_lat_normalized",
+    //     // weight: (d) => d.source === 'new' ? 1 : -1,
+    //     // weight: "count",
+    //     // bandwidth: 25,
+    //     fill: "density",
+    //     opacity: 0.5
+    //   }
+    // ),
+    // Plot.raster(stops, {x: "stop_lon_normalized", y: "stop_lat_normalized", fill: "pct_stops_difference", interpolate: "barycentric", blur: 10, opacity: 0.5}),
+    Plot.raster(stops, {x: "stop_lon_normalized", y: "stop_lat_normalized", fill: "ranking", interpolate: "barycentric", blur: 10, opacity: 0.5}),
     Plot.dot(stop_times, Plot.hexbin({r: "count"}, {x: "stop_lon_normalized", y: "stop_lat_normalized"}))
     // Plot.contour(stop_times, {x: "stop_lon_normalized", y: "stop_lat_normalized", fill: "count"})
   ]
