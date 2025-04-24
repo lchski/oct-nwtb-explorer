@@ -24,7 +24,8 @@ export const level_of_detail_input = Inputs.form({
 	}),
 	service_ids: Inputs.select(service_ids, {
 		multiple: true,
-		label: "service date(s) (blank for all)"
+		label: "service date(s) (blank for all)",
+		value: ["weekday"]
 	}),
 	only_new_stops: Inputs.toggle({
 		value: false,
