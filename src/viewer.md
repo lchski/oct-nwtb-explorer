@@ -109,21 +109,8 @@ const manual_map_control = Generators.input(manual_map_control_input)
 ```
 
 ```js
-const level_of_detail_input = Inputs.form({
-  // schedule: Inputs.select(["current", "new"], {label: "schedule version"}),
-  service_windows: Inputs.select(service_windows, {
-    multiple: true,
-    label: "service window(s) (blank for all)"
-  }),
-  service_ids: Inputs.select(service_ids, {
-    multiple: true,
-    label: "service date(s) (blank for all)"
-  }),
-  only_new_stops: Inputs.toggle({
-    value: false,
-    label: "Only show new stops"
-  })
-})
+import {level_of_detail_input, service_windows, service_ids, selected_service_windows, selected_service_ids} from './lib/controls.js'
+
 const level_of_detail = Generators.input(level_of_detail_input)
 ```
 
@@ -304,8 +291,8 @@ WITH stop_frequencies AS (
 		SUM(CASE WHEN source = 'new' THEN n_stop_times ELSE 0 END)::INTEGER AS new
 	FROM stop_times_by_stop
 	WHERE 
-		list_contains(${array_to_sql_qry_array(selected_service_windows)}, service_window) AND
-		list_contains(${array_to_sql_qry_array(selected_service_ids)}, service_id)
+		list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
+		list_contains(${array_to_sql_qry_array(selected_service_ids(level_of_detail))}, service_id)
 	GROUP BY stop_code
 ),
 stop_frequencies_all AS (
@@ -350,8 +337,8 @@ const stop_times = [...await octdb.query(`
 SELECT *
 FROM stop_times
 WHERE
-  list_contains(${array_to_sql_qry_array(selected_service_windows)}, service_window) AND
-  list_contains(${array_to_sql_qry_array(selected_service_ids)}, service_id)
+  list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
+  list_contains(${array_to_sql_qry_array(selected_service_ids(level_of_detail))}, service_id)
 `)]
 ```
 
@@ -360,33 +347,6 @@ import {octdb, array_to_sql_qry_array} from './lib/octdb.js'
 ```
 
 <!-- ### Other -->
-
-```js
-const selected_service_windows = level_of_detail.service_windows.length === 0 ?
-  service_windows :
-  level_of_detail.service_windows
-
-const selected_service_ids = level_of_detail.service_ids.length === 0 ?
-  service_ids :
-  level_of_detail.service_ids
-```
-
-```js 
-const service_windows = [
-  "off_peak_morning",
-  "peak_morning",
-  "off_peak_midday",
-  "peak_afternoon",
-  "off_peak_evening",
-  "off_peak_night"
-]
-
-const service_ids = [
-  "weekday",
-  "saturday",
-  "sunday"
-]
-```
 
 ```js
 const roads = FileAttachment("./data/ottawa.ca/Road_Centrelines_simplify_25.geojson").json()
