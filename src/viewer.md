@@ -6,7 +6,7 @@ toc: false
 
 ```js
 import {to_pct, ch_incr_decr} from './lib/helpers.js'
-import {level_of_detail_input, service_windows, service_ids, selected_service_windows, selected_service_ids} from './lib/controls.js'
+import {level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
 import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from './lib/maps.js'
 ```
 
