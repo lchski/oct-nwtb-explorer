@@ -1,4 +1,5 @@
 import * as Plot from "npm:@observablehq/plot";
+import * as d3 from "npm:d3";
 
 export const plot_basemap_components = ({
 	wards,
