@@ -1,5 +1,18 @@
+import {FileAttachment} from "observablehq:stdlib"
 import * as Plot from "npm:@observablehq/plot";
 import * as d3 from "npm:d3";
+
+export const roads = FileAttachment("../data/ottawa.ca/Road_Centrelines_simplify_25.geojson").json()
+
+export const ons_neighbourhoods = FileAttachment("../data/ottawa.ca/ons_boundaries.geojson").json()
+
+export const wards = FileAttachment("../data/ottawa.ca/wards_2022_to_2026.geojson").json()
+
+// Generated with mapshaper, merging 24 wards into one
+// ref: https://helpcenter.flourish.studio/hc/en-us/articles/8827921931919-How-to-merge-regions-with-Mapshaper
+export const city_limits = FileAttachment("../data/ottawa.ca/city-limits.geojson").json()
+
+
 
 export const plot_basemap_components = ({
 	wards,
