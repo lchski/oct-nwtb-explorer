@@ -1,6 +1,7 @@
 import {FileAttachment} from "observablehq:stdlib"
 import * as Plot from "npm:@observablehq/plot";
 import * as d3 from "npm:d3";
+import {rewind} from "jsr:@nshiab/journalism/web"; // NB: rewind the four imports below if you want to use conic-conformal projection
 
 export const roads = FileAttachment("../data/ottawa.ca/Road_Centrelines_simplify_25.geojson").json()
 
@@ -67,12 +68,12 @@ export const plot_basemap_components = ({
 
 export const get_map_domain = ({ map_control, manual_map_control, city_limits }) => {
 	if (map_control.ward.id === "city") {
-		return city_limits
+		return rewind(city_limits)
 	}
 	
 	if (map_control.ward.id === "manual") {
 		return d3.geoCircle().center([-75.689515 + manual_map_control.scroll_horizontal, 45.383611 + manual_map_control.scroll_vertical]).radius(manual_map_control.zoom)()
 	}
 	
-	return map_control.ward.geometry
+	return rewind(map_control.ward.geometry)
 }

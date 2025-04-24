@@ -115,9 +115,9 @@ const viewer_plot = Plot.plot({
   width: Math.max(width, 550),
   title: "Transit stops in Ottawa",
   projection: {
-    type: "reflect-y",
+    type: "mercator",
     domain: get_map_domain({ map_control, manual_map_control, city_limits }),
-    inset: 10
+    inset: 50 // TODO: adjust this down to 10 if looking at city limits
   },
   color: {
     type: "diverging",
@@ -158,12 +158,12 @@ const viewer_plot = Plot.plot({
         x: "stop_lon_normalized",
         y: "stop_lat_normalized",
         r: (d) => d.n_stops_new,
-        stroke: "currentColor",
+        stroke: "#000000",
         // fill: d => Math.round(d.pct_stops_difference * 1000) / 10,
         fill: "ranking",
         fillOpacity: 0.9,
-        strokeWidth: (manual_map_control.zoom <= 0.05) ? 0.2 : 0.01,
-        strokeOpacity: (manual_map_control.zoom <= 0.05) ? 1 : 0.5
+        strokeWidth: 0.2,
+        strokeOpacity: 1
       }
     ),
     Plot.dot(
@@ -171,13 +171,13 @@ const viewer_plot = Plot.plot({
         x: "stop_lon_normalized",
         y: "stop_lat_normalized",
         r: (d) => d.n_stops_new,
-        stroke: "currentColor",
+        stroke: "#000000",
         symbol: "cross",
         // fill: "n_stops_difference",
         fill: "ranking",
         fillOpacity: 0.9,
-        strokeWidth: (manual_map_control.zoom <= 0.05) ? 0.2 : 0.01,
-        strokeOpacity: (manual_map_control.zoom <= 0.05) ? 1 : 0.5
+        strokeWidth: 0.2,
+        strokeOpacity: 1
       }
     )
   ]
@@ -192,9 +192,9 @@ viewer_plot
 const stop_times_plot = Plot.plot({
   width: Math.max(width, 550),
   title: "Transit stops in Ottawa",
-  subtitle: "Hexagon size indicates how many times buses stop in a given area with the new schedule, based on all the stops in the area. Blurred colour indicates (roughly) the degree of change for that area, comparing the old schedule to the new one. (Blurred colour does an odd thing in the west end, due to outliers—sorry!)",
+  subtitle: "Hexagon size indicates how many times buses stop in a given area with the new schedule, based on all the stops in the area. Blurred colour indicates (roughly) the degree of change for that area, comparing the old schedule to the new one. Bluer means increased service, redder means reduced. (Blurred colour does odd things where there’s very low / no service, like some rural and industrial areas—sorry!)",
   projection: {
-    type: "reflect-y",
+    type: "mercator",
     domain: get_map_domain({ map_control, manual_map_control, city_limits }),
     inset: 10
   },
