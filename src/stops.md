@@ -1,6 +1,7 @@
 ---
 title: Stops
-theme: dashboard
+theme: [light, wide]
+toc: false
 ---
 
 ```js

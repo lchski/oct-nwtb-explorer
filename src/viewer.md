@@ -1,6 +1,6 @@
 ---
 title: Viewer
-theme: dashboard
+theme: [light, wide]
 toc: false
 ---
 
