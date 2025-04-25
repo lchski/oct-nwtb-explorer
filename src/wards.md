@@ -70,6 +70,16 @@ const ward_oi = view(Inputs.select([
     <div class="tip">The following numbers are affected by the schedule options you make above (e.g., weekday, Saturday, Sunday)—change those to see how your service changes!</div>
 </div>
 
+```js
+Plot.plot({
+    marks: [
+        Plot.rectY(stop_times_oi_per_stop, Plot.binX({y: "count"}, {x: "n_stop_times", fill: "source", fy: "source", domain: [0, 500]})),
+    ]
+})
+```
+
+TODO: count / describe how many stops have stop_times above 500, since we cut them off in the histogram to simplify things
+
 <!-- ## Data / loading -->
 
 <!-- ### Database -->
@@ -104,6 +114,21 @@ WHERE
   list_contains(${array_to_sql_qry_array(stops_oi.map(s => s.stop_code))}, stop_code)
 `)]
 
+const stop_times_oi_per_stop = [...await octdb.query(`
+SELECT
+    source,
+    stop_code,
+    COUNT(*) as n_stop_times
+FROM stop_times
+WHERE
+  list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
+  list_contains(${array_to_sql_qry_array(selected_service_ids(level_of_detail))}, service_id) AND
+  list_contains(${array_to_sql_qry_array(stops_oi.map(s => s.stop_code))}, stop_code)
+GROUP BY
+    source,
+    stop_code
+`)]
+
 let stop_times_oi_summary = {
     current: {
 		n: stop_times_oi.filter(st => st.source === "current").length,
@@ -136,6 +161,10 @@ stop_times_oi_summary = {
 
 ```js
 stop_times_oi
+```
+
+```js
+stop_times_oi_per_stop
 ```
 
 <!-- ### Other -->
