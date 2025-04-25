@@ -73,12 +73,12 @@ const ward_oi = view(Inputs.select([
 ```js
 Plot.plot({
     marks: [
-        Plot.rectY(stop_times_oi_per_stop, Plot.binX({y: "count"}, {x: "n_stop_times", fill: "source", fy: "source", domain: [0, 500]})),
+        Plot.rectY(stop_times_oi_per_stop, Plot.binX({y: "count"}, {x: "n_stop_times", fill: "source", fy: "source", domain: [0, 300]})),
     ]
 })
 ```
 
-TODO: count / describe how many stops have stop_times above 500, since we cut them off in the histogram to simplify things
+TODO: count / describe how many stops have stop_times above 300, since we cut them off in the histogram to simplify things
 
 <!-- ## Data / loading -->
 
