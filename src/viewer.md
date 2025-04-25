@@ -276,7 +276,9 @@ SELECT
 	END AS ranking
 FROM base_query
 ORDER BY ranking DESC`)]
+```
 
+```js
 const stop_times = [...await octdb.query(`
 SELECT *
 FROM stop_times
