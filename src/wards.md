@@ -56,7 +56,7 @@ const stop_table = Inputs.table(stop_search, {
 const ward_oi = view(Inputs.select([
         {
         id: "city",
-        name: "All",
+        name: "Ottawa",
         number: "full city view"
         },
         ...ward_details
@@ -72,8 +72,20 @@ const ward_oi = view(Inputs.select([
 
 ```js
 Plot.plot({
+    title: `How often do buses serve stops in ${ward_oi.name}?`,
+    subtitle: 'Histogram of how many times buses stop at each stop, current schedule vs. NWTB (cut off at 300, see below for any stops with a frequency greater than 300)',
+    width,
+    x: {label: "Departure frequency"},
+    y: {label: "Number of stops"},
     marks: [
-        Plot.rectY(stop_times_oi_per_stop, Plot.binX({y: "count"}, {x: "n_stop_times", fill: "source", fy: "source", domain: [0, 300]})),
+        Plot.rectY(stop_times_oi_per_stop, Plot.binX({y: "count"}, {x: "n_stop_times", fill: "source", fx: "source", domain: [0, 300], tip: {
+            pointer: "x",
+            format: {
+                fx: false,
+                fill: false,
+            }
+        }})),
+        Plot.axisFx({label: "Schedule"})
     ]
 })
 ```
@@ -157,14 +169,24 @@ stop_times_oi_summary = {
         pct_change: to_pct(stop_times_oi_summary.new.n_change / stop_times_oi_summary.current.n)
 	}
 }
-```
 
-```js
-stop_times_oi
+let stop_times_oi_per_stop_summary = aq.from(stop_times_oi_per_stop)
+    .groupby('source')
+    .rollup({
+        min: d => aq.op.min(d.n_stop_times),
+        max: d => aq.op.max(d.n_stop_times),
+        mean: d => Math.round(aq.op.mean(d.n_stop_times)),
+        median: d => aq.op.median(d.n_stop_times),
+    })
+    .objects()
 ```
 
 ```js
 stop_times_oi_per_stop
+```
+
+```js
+stop_times_oi_per_stop_summary
 ```
 
 <!-- ### Other -->
