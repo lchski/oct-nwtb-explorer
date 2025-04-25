@@ -1,5 +1,5 @@
 // NB: does one decimal
-export const to_pct = (frac) => Math.round(frac * 1000) / 10
+export const to_pct = (frac) => Number.isNaN(frac) ? 0 : Math.round(frac * 1000) / 10
 
 export const ch_incr_decr = (n, symbol = false) => {
 	if (symbol) {

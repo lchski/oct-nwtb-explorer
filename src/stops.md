@@ -61,11 +61,27 @@ const stop_codes_oi_raw = view(Inputs.text({
 
 ```js
 const stop_codes_oi = stop_codes_oi_raw.split(/[^A-Z0-9]+/).filter(sc => sc !== "")
+const stops_oi = stops.filter(s => stop_codes_oi.includes(s.stop_code))
 ```
 
-```js
-stop_codes_oi
-```
+<div class="grid grid-cols-2" style="grid-auto-rows: auto;">
+    <div class="note">
+        <p>You’ll see information for the following ${stops_oi.length.toLocaleString()} stop(s):</p>
+        ${html`
+        <ul>
+            ${
+                stops_oi.map(
+                    d => htl.html`<li>${d.stop_code} – ${d.stop_name_normalized}</li>`
+                )
+            }
+        </ul>
+        `}
+    </div>
+
+<div class="tip">The following numbers are affected by the schedule options you make above (e.g., weekday, Saturday, Sunday)—change those to see how your service changes!</div>
+</div>
+
+Buses currently stop ${stop_times_oi_summary.current.n.toLocaleString()} times at your ${stops_oi.length.toLocaleString()} selected stop(s). Under the new schedule, they’ll stop ${stop_times_oi_summary.new.n.toLocaleString()} times (${ch_incr_decr(stop_times_oi_summary.new.n_change, true)}${Math.abs(stop_times_oi_summary.new.n_change)}, a ${stop_times_oi_summary.new.pct_change}% change).
 
 <!-- ## Data / loading -->
 
@@ -93,6 +109,46 @@ WHERE
   list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
   list_contains(${array_to_sql_qry_array(selected_service_ids(level_of_detail))}, service_id)
 `)]
+```
+
+```js
+const stop_times_oi = [...await octdb.query(`
+SELECT * EXCLUDE(stop_lat_normalized, stop_lon_normalized)
+FROM stop_times
+WHERE
+  list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
+  list_contains(${array_to_sql_qry_array(selected_service_ids(level_of_detail))}, service_id) AND
+  list_contains(${array_to_sql_qry_array(stop_codes_oi)}, stop_code)
+`)]
+
+let stop_times_oi_summary = {
+    current: {
+		n: stop_times_oi.filter(st => st.source === "current").length,
+	},
+	new: {
+		n: stop_times_oi.filter(st => st.source === "new").length,
+	},
+}
+
+stop_times_oi_summary = {
+    current: {
+		...stop_times_oi_summary.current,
+	},
+	new: {
+		...stop_times_oi_summary.new,
+		n_change: stop_times_oi_summary.new.n - stop_times_oi_summary.current.n,
+	}
+}
+
+stop_times_oi_summary = {
+    current: {
+		...stop_times_oi_summary.current,
+	},
+	new: {
+		...stop_times_oi_summary.new,
+        pct_change: to_pct(stop_times_oi_summary.new.n_change / stop_times_oi_summary.current.n)
+	}
+}
 ```
 
 <!-- ### Other -->
