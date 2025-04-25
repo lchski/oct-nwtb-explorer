@@ -17,14 +17,54 @@ const level_of_detail = Generators.input(level_of_detail_input)
 		<h3>OC Transpo service details</h3>
 		${level_of_detail_input}
 	</div>
+    <div class="card">
+        <h3>Stop lookup</h3>
+        ${stop_search_input}
+        ${stop_table}
+    </div>
 </div>
 
 ```js
-const search = view(Inputs.search(stops, {placeholder: "Search stops"}));
+const stop_search_input = Inputs.search(stops, {placeholder: "Search stops"})
+const stop_search = Generators.input(stop_search_input);
 ```
 
 ```js
-Inputs.table(search)
+const stop_table = Inputs.table(stop_search, {
+    columns: [
+        "stop_code",
+        "stop_name_normalized",
+        "ward_number"
+    ],
+    header: {
+        stop_code: "Stop code",
+        stop_name_normalized: "Stop name",
+        ward_number: "Ward"
+    },
+    format: {
+        ward_number: x => `${x} – ${ward_details.find(w => w.number == x).name}`
+    },
+    width: {
+        stop_code: 80
+    },
+    select: false
+})
+```
+
+```js
+const stop_codes_oi_raw = view(Inputs.text({
+    label: "Stop code(s) of interest",
+    placeholder: "e.g., enter just “3011” for Tunney’s Pasture",
+    submit: true
+}))
+```
+
+```js
+const stop_codes_oi = stop_codes_oi_raw.split(/[^A-Z0-9]+/).filter(sc => sc !== "")
+```
+
+```js
+stop_codes_oi
 ```
 
 <!-- ## Data / loading -->
@@ -37,7 +77,10 @@ import {octdb, array_to_sql_qry_array} from './lib/octdb.js'
 
 ```js
 const stops = [...await octdb.query(`
-SELECT *
+SELECT 
+    stop_code,
+    stop_name_normalized,
+    ward_number::INTEGER AS ward_number
 FROM stops
 `)]
 ```
