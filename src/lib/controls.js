@@ -1,5 +1,7 @@
 import * as Inputs from "npm:@observablehq/inputs";
 
+export const service_period_desc = `The numbers and charts are affected by the “service period” you set. A service period combines service dates (weekday, Saturday, or Sunday) and service windows (the time of day). You can choose multiple service dates and windows.`
+
 export const service_windows = [
 	{window: "off_peak_morning", label: "Early morning (5 am to 6:30 am)"},
 	{window: "peak_morning", label: "Morning peak (6:30 am to 9 am)"},

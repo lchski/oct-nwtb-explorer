@@ -1,28 +1,25 @@
 ---
 title: Wards
 theme: [light, wide]
-toc: false
 ---
 
 ```js
 import {to_pct, ch_incr_decr, summ_diff} from './lib/helpers.js'
-import {level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
+import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
 import {wards} from './lib/maps.js'
 
 const level_of_detail = Generators.input(level_of_detail_input)
 ```
 
+## Choose service period
+
+${service_period_desc}
+
 <div class="grid grid-cols-2" style="grid-auto-rows: auto;">
-	<h2 class="grid-colspan-2">Controls</h2>
 	<div class="card">
 		<h3>OC Transpo service period</h3>
 		${level_of_detail_input}
 	</div>
-    <div class="card">
-        <h3>Stop lookup within your selected ward (or the whole city, if that’s what you choose!)</h3>
-        ${stop_search_input}
-        ${stop_table}
-    </div>
 </div>
 
 ```js
@@ -52,21 +49,39 @@ const stop_table = Inputs.table(stop_search, {
 })
 ```
 
+## Focus on a ward
+
+Choose a ward to learn more about:
+
 ```js
 const ward_oi = view(Inputs.select([
         {
         id: "city",
         name: "Ottawa",
-        number: "full city view"
+        number: "all wards"
         },
         ...ward_details
     ], {
-        label: "ward",
         format: (ward) => `${ward.name} (${ward.number})`
 }))
 ```
 
-You’ve selected ${ward_oi.name}. ${ward_oi.name} has ${stops_oi.length} total stops (combining the existing and new schedule), with ${stop_times_oi_per_stop.filter(s => s.source === 'new').length} (${to_pct(stop_times_oi_per_stop.filter(s => s.source === 'new').length / stops_oi.length)}%) active in the new schedule during the service period you’ve selected above.
+<div class="grid grid-cols-2" style="grid-auto-rows: auto;">
+<div>
+
+During the service period you’ve selected above, ${ward_oi.name} has:
+- ${stops_oi.length} total stops (combining the existing and new schedule)
+- ${stop_times_oi_per_stop.filter(s => s.source === 'new').length} (${to_pct(stop_times_oi_per_stop.filter(s => s.source === 'new').length / stops_oi.length)}%) of these stops active in the new schedule
+
+Buses arrive at these stops TKTK times in total.
+
+</div>
+<div class="card">
+        <h3>Stop lookup within your selected ward (or the whole city, if that’s what you choose!)</h3>
+        ${stop_search_input}
+        ${stop_table}
+</div>
+</div>
 
 ```js
 const stop_times_oi_cutoff = 300
@@ -120,6 +135,12 @@ _A mean value of ${stop_times_oi_per_stop_summary_new.mean} indicates that the a
 </div>
     <div class="tip" style="height: fit-content">These numbers are affected by the service options you make above (e.g., weekday, Saturday, Sunday)—change those to see how your service numbers change!</div>
 </div>
+
+
+
+## Compare wards
+
+
 
 <!-- ## Data / loading -->
 
