@@ -16,3 +16,9 @@ export const ch_incr_decr = (n, symbol = false) => {
 
 	return 'decrease'
 }
+
+export const summ_diff = (oldNum, newNum) => {
+	const diff = newNum - oldNum
+
+	return `${ch_incr_decr(diff, true)}${Math.abs(diff)}`
+}

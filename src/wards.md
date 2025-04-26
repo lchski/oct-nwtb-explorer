@@ -5,7 +5,7 @@ toc: false
 ---
 
 ```js
-import {to_pct, ch_incr_decr} from './lib/helpers.js'
+import {to_pct, ch_incr_decr, summ_diff} from './lib/helpers.js'
 import {level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
 import {wards} from './lib/maps.js'
 
@@ -15,7 +15,7 @@ const level_of_detail = Generators.input(level_of_detail_input)
 <div class="grid grid-cols-2" style="grid-auto-rows: auto;">
 	<h2 class="grid-colspan-2">Controls</h2>
 	<div class="card">
-		<h3>OC Transpo service details</h3>
+		<h3>OC Transpo service period</h3>
 		${level_of_detail_input}
 	</div>
     <div class="card">
@@ -78,10 +78,10 @@ const stop_times_oi_per_stop_above_cutoff = stop_times_oi_per_stop.filter(s => s
 
 ```js
 Plot.plot({
-    title: `How often do buses serve stops in ${ward_oi.name}?`,
-    subtitle: `Histogram of how many times buses stop at each stop, current schedule vs. NWTB (cut off at ${stop_times_oi_cutoff}, see below for any stops with a frequency greater than ${stop_times_oi_cutoff})`,
+    title: `How often do buses arrive at stops in ${ward_oi.name}?`,
+    subtitle: `Histogram of how many times buses arrive at each stop, current schedule vs. NWTB (cut off at ${stop_times_oi_cutoff}, see below)`,
     width,
-    x: {label: "Departure frequency"},
+    x: {label: "Arrival frequency"},
     y: {label: "Number of stops"},
     marks: [
         Plot.rectY(stop_times_oi_per_stop, Plot.binX({y: "count"}, {x: "n_stop_times", fill: "source", fx: "source", domain: [0, stop_times_oi_cutoff], tip: {
@@ -96,7 +96,17 @@ Plot.plot({
 })
 ```
 
-The histogram cuts off ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'current').length} stop(s) in the current schedule and ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'new').length} stop(s) in the new schedule where buses depart more than ${stop_times_oi_cutoff} times during the selected timeframe.
+_The histogram cuts off ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'current').length} stop(s) in the current schedule and ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'new').length} stop(s) in the new schedule where buses arrive more than ${stop_times_oi_cutoff} times during the selected timeframe._
+
+Here are key measures for bus arrival frequency in ${ward_oi.name}:
+
+Measure   | Current     | New
+---------- | ------------ | ----------
+Range   | ${stop_times_oi_per_stop_summary_current.min} to ${stop_times_oi_per_stop_summary_current.max} | ${stop_times_oi_per_stop_summary_new.min} to ${stop_times_oi_per_stop_summary_new.max}
+Mean   | ${stop_times_oi_per_stop_summary_current.mean} | ${stop_times_oi_per_stop_summary_new.mean} (${summ_diff(stop_times_oi_per_stop_summary_current.mean, stop_times_oi_per_stop_summary_new.mean)})
+Median   | ${stop_times_oi_per_stop_summary_current.median} | ${stop_times_oi_per_stop_summary_new.median} (${summ_diff(stop_times_oi_per_stop_summary_current.median, stop_times_oi_per_stop_summary_new.median)})
+
+_A mean value of 3, for example, means that, on average, buses arrive at stops in ${ward_oi.name} 3 times during the service period you’ve selected above._
 
 <!-- ## Data / loading -->
 
@@ -116,10 +126,6 @@ FROM stops
 WHERE
     ${(ward_oi.id !== 'city') ? `ward_number = '${ward_oi.number}'` : 'TRUE'}
 `)]
-```
-
-```js
-stops_oi
 ```
 
 ```js
@@ -176,23 +182,18 @@ stop_times_oi_summary = {
 	}
 }
 
-let stop_times_oi_per_stop_summary = aq.from(stop_times_oi_per_stop)
+const stop_times_oi_per_stop_summary = aq.from(stop_times_oi_per_stop)
     .groupby('source')
     .rollup({
         min: d => aq.op.min(d.n_stop_times),
         max: d => aq.op.max(d.n_stop_times),
         mean: d => Math.round(aq.op.mean(d.n_stop_times)),
-        median: d => aq.op.median(d.n_stop_times),
+        median: d => Math.round(aq.op.median(d.n_stop_times)),
     })
     .objects()
-```
 
-```js
-stop_times_oi_per_stop
-```
-
-```js
-stop_times_oi_per_stop_summary
+const stop_times_oi_per_stop_summary_current = stop_times_oi_per_stop_summary.find(d => d.source === 'current')
+const stop_times_oi_per_stop_summary_new = stop_times_oi_per_stop_summary.find(d => d.source === 'new')
 ```
 
 <!-- ### Other -->
