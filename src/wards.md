@@ -71,14 +71,20 @@ const ward_oi = view(Inputs.select([
 </div>
 
 ```js
+const stop_times_oi_cutoff = 300
+
+const stop_times_oi_per_stop_above_cutoff = stop_times_oi_per_stop.filter(s => s.n_stop_times > stop_times_oi_cutoff)
+```
+
+```js
 Plot.plot({
     title: `How often do buses serve stops in ${ward_oi.name}?`,
-    subtitle: 'Histogram of how many times buses stop at each stop, current schedule vs. NWTB (cut off at 300, see below for any stops with a frequency greater than 300)',
+    subtitle: `Histogram of how many times buses stop at each stop, current schedule vs. NWTB (cut off at ${stop_times_oi_cutoff}, see below for any stops with a frequency greater than ${stop_times_oi_cutoff})`,
     width,
     x: {label: "Departure frequency"},
     y: {label: "Number of stops"},
     marks: [
-        Plot.rectY(stop_times_oi_per_stop, Plot.binX({y: "count"}, {x: "n_stop_times", fill: "source", fx: "source", domain: [0, 300], tip: {
+        Plot.rectY(stop_times_oi_per_stop, Plot.binX({y: "count"}, {x: "n_stop_times", fill: "source", fx: "source", domain: [0, stop_times_oi_cutoff], tip: {
             pointer: "x",
             format: {
                 fx: false,
@@ -90,7 +96,7 @@ Plot.plot({
 })
 ```
 
-TODO: count / describe how many stops have stop_times above 300, since we cut them off in the histogram to simplify things
+The histogram cuts off ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'current').length} stop(s) in the current schedule and ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'new').length} stop(s) in the new schedule where buses depart more than ${stop_times_oi_cutoff} times during the selected timeframe.
 
 <!-- ## Data / loading -->
 
