@@ -82,13 +82,21 @@ Plot.plot({
     x: {label: "Arrival frequency"},
     y: {label: "Number of stops"},
     marks: [
-        Plot.rectY(stop_times_oi_per_stop, Plot.binX({y: "count"}, {x: "n_stop_times", fill: "source", fx: "source", domain: [0, stop_times_oi_cutoff], tip: {
-            pointer: "x",
-            format: {
-                fx: false,
-                fill: false,
+        Plot.rectY(stop_times_oi_per_stop, Plot.binX({y: "count"}, {
+            x: "n_stop_times",
+            fill: "source",
+            fx: "source",
+            // thresholds: [...Array(300 / 20 + 1)].map((_, index) => index * 20),
+            interval: 20,
+            domain: [0, stop_times_oi_cutoff],
+            tip: {
+                pointer: "x",
+                format: {
+                    fx: false,
+                    fill: false,
+                }
             }
-        }})),
+        })),
         Plot.axisFx({label: "Schedule"})
     ]
 })
