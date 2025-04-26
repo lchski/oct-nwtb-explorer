@@ -66,9 +66,7 @@ const ward_oi = view(Inputs.select([
 }))
 ```
 
-<div class="grid grid-cols-2" style="grid-auto-rows: auto;">
-    <div class="tip">The following numbers are affected by the schedule options you make above (e.g., weekday, Saturday, Sunday)—change those to see how your service changes!</div>
-</div>
+You’ve selected ${ward_oi.name}. ${ward_oi.name} has ${stops_oi.length} total stops (combining the existing and new schedule), with ${stop_times_oi_per_stop.filter(s => s.source === 'new').length} (${to_pct(stop_times_oi_per_stop.filter(s => s.source === 'new').length / stops_oi.length)}%) active in the new schedule during the service period you’ve selected above.
 
 ```js
 const stop_times_oi_cutoff = 300
@@ -96,6 +94,9 @@ Plot.plot({
 })
 ```
 
+<div class="grid grid-cols-2">
+    <div>
+
 _The histogram cuts off ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'current').length} stop(s) in the current schedule and ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'new').length} stop(s) in the new schedule where buses arrive more than ${stop_times_oi_cutoff} times during the selected timeframe._
 
 Here are key measures for bus arrival frequency in ${ward_oi.name}:
@@ -106,7 +107,11 @@ Range   | ${stop_times_oi_per_stop_summary_current.min} to ${stop_times_oi_per_s
 Mean   | ${stop_times_oi_per_stop_summary_current.mean} | ${stop_times_oi_per_stop_summary_new.mean} (${summ_diff(stop_times_oi_per_stop_summary_current.mean, stop_times_oi_per_stop_summary_new.mean)})
 Median   | ${stop_times_oi_per_stop_summary_current.median} | ${stop_times_oi_per_stop_summary_new.median} (${summ_diff(stop_times_oi_per_stop_summary_current.median, stop_times_oi_per_stop_summary_new.median)})
 
-_A mean value of 3, for example, means that, on average, buses arrive at stops in ${ward_oi.name} 3 times during the service period you’ve selected above._
+_A mean value of ${stop_times_oi_per_stop_summary_new.mean} indicates that the average stop in ${ward_oi.name} has ${stop_times_oi_per_stop_summary_new.mean} arrivals during the service period you’ve selected above. Some stops will have more frequent arrivals, and others less frequent, as indicated by the range value._
+
+</div>
+    <div class="tip" style="height: fit-content">These numbers are affected by the service options you make above (e.g., weekday, Saturday, Sunday)—change those to see how your service numbers change!</div>
+</div>
 
 <!-- ## Data / loading -->
 
