@@ -51,18 +51,6 @@ export const plot_basemap_components = ({
 				strokeWidth: 0.15
 			}
 		),
-		Plot.geo(
-			ons_neighbourhoods,
-			Plot.centroid({
-				tip: false,
-				channels: {
-					"Neighbourhood": (d) => d.properties.Name,
-					"Population (approx)": (d) => d.properties.POPEST.toLocaleString(),
-					"ONS ID": (d) => d.properties.ONS_ID
-				},
-				strokeOpacity: 0
-			})
-		)
 	]
 }
 
