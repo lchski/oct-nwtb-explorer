@@ -75,7 +75,7 @@ During the service period you’ve selected above, ${ward_oi.name} has:
 - ${stops_oi.length.toLocaleString()} total stops (combining the existing and new schedule)
 - ${stop_times_oi_per_stop.filter(s => s.source === 'new').length.toLocaleString()} (${to_pct(stop_times_oi_per_stop.filter(s => s.source === 'new').length / stops_oi.length)}%) of these stops active in the new schedule
 
-Buses arrive at these stops ${stop_times_oi_summary.new.n.toLocaleString()} times in the new schedule.
+Buses or trains arrive at these stops ${stop_times_oi_summary.new.n.toLocaleString()} times in the new schedule.
 
 </div>
 <div class="card">
@@ -93,8 +93,8 @@ const stop_times_oi_per_stop_above_cutoff = stop_times_oi_per_stop.filter(s => s
 
 ```js
 Plot.plot({
-    title: `How often do buses arrive at stops in ${ward_oi.name}?`,
-    subtitle: `Histogram of how many times buses arrive at each stop, current schedule vs. NWTB (cut off at ${stop_times_oi_cutoff}, see below)`,
+    title: `How often do buses or trains arrive at stops in ${ward_oi.name}?`,
+    subtitle: `Histogram of how many times buses or trains arrive at each stop, current schedule vs. NWTB (cut off at ${stop_times_oi_cutoff}, see below)`,
     width,
     x: {label: "Arrival frequency"},
     y: {label: "Number of stops"},
@@ -122,9 +122,9 @@ Plot.plot({
 <div class="grid grid-cols-2">
     <div>
 
-_The histogram cuts off ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'current').length} stop(s) in the current schedule and ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'new').length} stop(s) in the new schedule where buses arrive more than ${stop_times_oi_cutoff} times during the selected timeframe._
+_The histogram cuts off ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'current').length} stop(s) in the current schedule and ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'new').length} stop(s) in the new schedule where buses or trains arrive more than ${stop_times_oi_cutoff} times during the selected timeframe._
 
-Here are key measures for bus arrival frequency at stops in ${ward_oi.name}:
+Here are key measures for arrival frequency at stops in ${ward_oi.name}:
 
 Measure   | Current     | New
 ---------- | ------------ | ----------
