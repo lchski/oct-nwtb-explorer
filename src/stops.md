@@ -6,14 +6,17 @@ toc: false
 
 ```js
 import {to_pct, ch_incr_decr} from './lib/helpers.js'
-import {level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
+import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
 import {wards} from './lib/maps.js'
 
 const level_of_detail = Generators.input(level_of_detail_input)
 ```
 
+## Choose service period
+
+${service_period_desc}
+
 <div class="grid grid-cols-2" style="grid-auto-rows: auto;">
-	<h2 class="grid-colspan-2">Controls</h2>
 	<div class="card">
 		<h3>OC Transpo service details</h3>
 		${level_of_detail_input}

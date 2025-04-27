@@ -29,10 +29,6 @@ export const level_of_detail_input = Inputs.form({
 		label: "service date(s) (blank for all)",
 		value: ["weekday"]
 	}),
-	only_new_stops: Inputs.toggle({
-		value: false,
-		label: "only show new stops"
-	})
 })
 
 export const selected_service_windows = (level_of_detail) =>

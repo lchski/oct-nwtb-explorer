@@ -6,15 +6,19 @@ toc: false
 
 ```js
 import {to_pct, ch_incr_decr} from './lib/helpers.js'
-import {level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
+import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
 import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from './lib/maps.js'
 ```
 
+## Choose service period
+
+${service_period_desc}
+
 <div class="grid grid-cols-2" style="grid-auto-rows: auto;">
-	<h2 class="grid-colspan-2">Controls</h2>
 	<div class="card">
 		<h3>OC Transpo service details</h3>
 		${level_of_detail_input}
+    ${level_of_detail_ext_input}
 	</div>
 	<div class="card">
 		<h3>Map controls</h3>
@@ -55,6 +59,16 @@ stops_summary = {
 		change: stops_summary.new.n - stops_summary.current.n
 	}
 }
+```
+
+```js
+const level_of_detail_ext_input = Inputs.form({
+	only_new_stops: Inputs.toggle({
+		value: false,
+		label: "only show new stops"
+	})
+})
+const level_of_detail_ext = Generators.input(level_of_detail_ext_input)
 ```
 
 ```js
@@ -127,7 +141,7 @@ const viewer_plot = Plot.plot({
   marks: [
     ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control }),
     Plot.dot(// combines new and existing stops to provide the pointer details
-      (level_of_detail.only_new_stops) ? stops.filter(stop => stop.is_entirely_new_stop) : stops, Plot.pointer({
+      (level_of_detail_ext.only_new_stops) ? stops.filter(stop => stop.is_entirely_new_stop) : stops, Plot.pointer({
         x: "stop_lon_normalized",
         y: "stop_lat_normalized",
         r: (d) => d.n_stops_new,
@@ -153,7 +167,7 @@ const viewer_plot = Plot.plot({
         }}
       })
     ),
-    (level_of_detail.only_new_stops) ? null : Plot.dot(
+    (level_of_detail_ext.only_new_stops) ? null : Plot.dot(
       stops.filter(stop => ! stop.is_entirely_new_stop), {
         x: "stop_lon_normalized",
         y: "stop_lat_normalized",
