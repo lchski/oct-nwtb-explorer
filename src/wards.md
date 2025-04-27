@@ -97,7 +97,7 @@ Plot.plot({
     subtitle: `Histogram of how many times buses or trains arrive at each stop, current schedule vs. NWTB (cut off at ${stop_times_oi_cutoff}, see below)`,
     width,
     x: {label: "Arrival frequency"},
-    y: {label: "Number of stops"},
+    y: {label: "Number of stops", tickFormat: "s", grid: true},
     marks: [
         Plot.rectY(stop_times_oi_per_stop, Plot.binX({y: "count"}, {
             x: "n_stop_times",
