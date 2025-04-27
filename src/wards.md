@@ -75,7 +75,7 @@ During the service period you’ve selected above, ${ward_oi.name} has:
 - ${stops_oi.length.toLocaleString()} total stops (combining the existing and new schedule)
 - ${stop_times_oi_per_stop.filter(s => s.source === 'new').length.toLocaleString()} (${to_pct(stop_times_oi_per_stop.filter(s => s.source === 'new').length / stops_oi.length)}%) of these stops active in the new schedule
 
-Buses arrive at these stops TKTK times in total.
+Buses arrive at these stops ${stop_times_oi_summary.new.n.toLocaleString()} times in the new schedule.
 
 </div>
 <div class="card">
@@ -145,9 +145,9 @@ const map_control_stub = {
     roads: (ward_oi.id == 'city') ? 4 : 5
 }
 
-const stop_times_plot = Plot.plot({
+const stop_times_plot = (ward_oi.id === 'city') ? '' : Plot.plot({
   width: Math.max(width, 550),
-  title: "Transit stops in Ottawa",
+  title: `Transit stops in ${ward_oi.name}`,
   projection: {
     type: "mercator",
     domain: rewind(ward_oi.geometry),
@@ -161,13 +161,15 @@ const stop_times_plot = Plot.plot({
     ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control: map_control_stub }),
     Plot.dot(stop_times_oi, Plot.group(
         {r: "count"},
-        {
+        {// TODO: can we do just a _diff_, i.e., plot dots where service doesn’t change in a neutral colour, stops where there’s an increase in a positive colour, and stops where there’s a decrease in a negative colour—and size all the dots by the amount of service in the new schedule
             x: "stop_lon_normalized",
             y: "stop_lat_normalized",
             color: "source",
             fill: "source",
             title: d => `#${d.stop_code}: ${stops_oi.find(s => s.stop_code === d.stop_code).stop_name_normalized}`,
-            tip: true
+            tip: true,
+            fx: "source",
+            opacity: 0.7
         }
     ))
   ]
@@ -175,7 +177,7 @@ const stop_times_plot = Plot.plot({
 ```
 
 ```js
-stop_times_plot
+(ward_oi.id !== 'city') ? stop_times_plot : htl.html`<figure><h2>Transit stops in Ottawa</h2><p><em>To see a map of stops, pick a specific ward.</em></p></figure>`
 ```
 
 
