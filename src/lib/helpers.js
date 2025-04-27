@@ -49,3 +49,88 @@ export const label_service_windows = (row) => {
 	
 	return newRow;
 };
+
+export const label_wards = (row) => {
+	const newRow = { ...row };
+	
+	switch (newRow.ward_number) {
+		case '1':
+			newRow.ward = '01 - Orléans East-Cumberland';
+			break;
+		case '2':
+			newRow.ward = '02 - Orléans West-Innes';
+			break;
+		case '3':
+			newRow.ward = '03 - Barrhaven West';
+			break;
+		case '4':
+			newRow.ward = '04 - Kanata North';
+			break;
+		case '5':
+			newRow.ward = '05 - West Carleton-March';
+			break;
+		case '6':
+			newRow.ward = '06 - Stittsville';
+			break;
+		case '7':
+			newRow.ward = '07 - Bay';
+			break;
+		case '8':
+			newRow.ward = '08 - College';
+			break;
+		case '9':
+			newRow.ward = '09 - Knoxdale-Merivale';
+			break;
+		case '10':
+			newRow.ward = '10 - Gloucester-Southgate';
+			break;
+		case '11':
+			newRow.ward = '11 - Beacon Hill-Cyrville';
+			break;
+		case '12':
+			newRow.ward = '12 - Rideau-Vanier';
+			break;
+		case '13':
+			newRow.ward = '13 - Rideau-Rockcliffe';
+			break;
+		case '14':
+			newRow.ward = '14 - Somerset';
+			break;
+		case '15':
+			newRow.ward = '15 - Kitchissippi';
+			break;
+		case '16':
+			newRow.ward = '16 - River';
+			break;
+		case '17':
+			newRow.ward = '17 - Capital';
+			break;
+		case '18':
+			newRow.ward = '18 - Alta Vista';
+			break;
+		case '19':
+			newRow.ward = '19 - Orléans South-Navan';
+			break;
+		case '20':
+			newRow.ward = '20 - Osgoode';
+			break;
+		case '21':
+			newRow.ward = '21 - Rideau-Jock';
+			break;
+		case '22':
+			newRow.ward = '22 - Riverside South-Findlay Creek';
+			break;
+		case '23':
+			newRow.ward = '23 - Kanata South';
+			break;
+		case '24':
+			newRow.ward = '24 - Barrhaven East';
+			break;
+		default:
+			newRow.ward = 'Unknown (likely Gatineau)';
+			break;
+	}
+	
+	return newRow;
+};
+

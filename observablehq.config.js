@@ -19,7 +19,7 @@ export default {
     {
       name: "Explore by…",
       pages: [
-        {name: "Wards", path: "/wards"},
+        {name: "Wards (including city-wide)", path: "/wards"},
         {name: "Stops", path: "/stops"},
         {name: "Maps", path: "/maps"},
       ]

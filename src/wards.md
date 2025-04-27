@@ -4,7 +4,7 @@ theme: [light, wide]
 ---
 
 ```js
-import {to_pct, ch_incr_decr, summ_diff, label_service_windows} from './lib/helpers.js'
+import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards} from './lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
 import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from './lib/maps.js'
 import {rewind} from "jsr:@nshiab/journalism/web"
@@ -14,7 +14,7 @@ const level_of_detail = Generators.input(level_of_detail_input)
 
 # Wards
 
-Explore the NWTB data by focusing on a ward at a time. See charts, summary statistics, maps comparing the old schedule to the new one.
+Explore the NWTB data by focusing on a ward at a time. See charts, summary statistics, maps comparing the old schedule to the new one. Instead of focusing on one ward, you can choose to see the same analysis city-wide.
 
 ## Choose service period
 
@@ -180,7 +180,7 @@ const map_control_stub = {
 }
 
 const stop_times_plot = (ward_oi.id === 'city') ? '' : Plot.plot({
-  width: Math.max(width, 550),
+  width: width,
   title: `Transit stops in ${ward_oi.name}`,
   projection: {
     type: "mercator",
@@ -221,9 +221,34 @@ TKTK TODO: can we do just a _diff_ dot plot, i.e., plot dots where service doesn
 
 ## Compare wards
 
+```js
+Plot.plot({
+    width,
+    marks: [
+        Plot.barX(stops_by_ward.map(label_wards), Plot.group(
+            {x: "count"},
+            {
+                x: "source",
+                y: "ward",
+                fy: "source",
+                fill: "source",
+                tip: {
+                    pointer: "y",
+                    format: {
+                        fx: false,
+                        fill: false,
+                    }
+                }
+            }
+        ))
+    ]
+})
+```
+
 TKTK, faceted by ward and source where possible (to visually compare service levels):
 - \# of stops
 - \# of stops in the top 10% frequency percentile
+- \# of arrivals
 
 
 
@@ -234,6 +259,25 @@ TKTK, faceted by ward and source where possible (to visually compare service lev
 
 ```js
 import {octdb, array_to_sql_qry_array} from './lib/octdb.js'
+```
+
+```js
+const stops_by_ward = [...await octdb.query(`
+SELECT
+    *
+FROM stop_times_by_stop
+WHERE 
+    list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
+    list_contains(${array_to_sql_qry_array(selected_service_ids(level_of_detail))}, service_id)
+`)]
+```
+
+```js
+stops_by_ward.slice(0, 10)
+```
+
+```js
+stops_by_ward.slice(0, 10).map(label_wards)
 ```
 
 ```js
