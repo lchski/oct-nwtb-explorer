@@ -70,8 +70,8 @@ const ward_oi = view(Inputs.select([
 <div>
 
 During the service period you’ve selected above, ${ward_oi.name} has:
-- ${stops_oi.length} total stops (combining the existing and new schedule)
-- ${stop_times_oi_per_stop.filter(s => s.source === 'new').length} (${to_pct(stop_times_oi_per_stop.filter(s => s.source === 'new').length / stops_oi.length)}%) of these stops active in the new schedule
+- ${stops_oi.length.toLocaleString()} total stops (combining the existing and new schedule)
+- ${stop_times_oi_per_stop.filter(s => s.source === 'new').length.toLocaleString()} (${to_pct(stop_times_oi_per_stop.filter(s => s.source === 'new').length / stops_oi.length)}%) of these stops active in the new schedule
 
 Buses arrive at these stops TKTK times in total.
 
@@ -140,7 +140,9 @@ _A mean value of ${stop_times_oi_per_stop_summary_new.mean} indicates that the a
 
 ## Compare wards
 
-
+TKTK, faceted by ward and source where possible (to visually compare service levels):
+- \# of stops
+- \# of stops in the top 10% frequency percentile
 
 <!-- ## Data / loading -->
 
