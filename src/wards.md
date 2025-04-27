@@ -221,9 +221,13 @@ TKTK TODO: can we do just a _diff_ dot plot, i.e., plot dots where service doesn
 
 ## Compare wards
 
+<div class="grid grid-cols-2">
+    <div class="card">${stops_by_ward_plot}</div>
+    <div class="card">${arrivals_by_ward_plot}</div>
+</div>
 
 ```js
-Plot.plot({
+const stops_by_ward_plot = Plot.plot({
     title: `How many stops are there by ward?`,
     subtitle: "Counts how many stops are active during selected service windows, current schedule vs. NWTB",
     marginLeft: 200,
@@ -252,9 +256,35 @@ Plot.plot({
 })
 ```
 
-TKTK, faceted by ward and source where possible (to visually compare service levels):
-- \# of stops in the top 10% frequency percentile
-- \# of arrivals
+```js
+const arrivals_by_ward_plot = Plot.plot({
+    title: `How many arrivals, by ward?`,
+    subtitle: "Counts how many times buses or trains arrive during selected service windows, current schedule vs. NWTB",
+    marginLeft: 200,
+    y: {axis: null, label: "Schedule"},
+    fy: {label: "Ward"},
+    x: {label: "Arrival frequency", tickFormat: "s", grid: true},
+    color: {legend: true},
+    marks: [
+        Plot.barX(arrivals_by_ward.map(label_wards), Plot.group(
+            {x: "count"},
+            {
+                x: "ward",
+                y: "source",
+                fy: "ward",
+                fill: "source",
+                tip: {
+                    pointer: "y",
+                    format: {
+                        fx: false,
+                        fill: false,
+                    }
+                }
+            }
+        ))
+    ]
+})
+```
 
 
 
@@ -279,11 +309,15 @@ WHERE
 ```
 
 ```js
-stops_by_ward.slice(0, 10)
-```
-
-```js
-stops_by_ward.slice(0, 10).map(label_wards)
+const arrivals_by_ward = [...await octdb.query(`
+SELECT
+    ward_number,
+    source
+FROM stop_times
+WHERE 
+    list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
+    list_contains(${array_to_sql_qry_array(selected_service_ids(level_of_detail))}, service_id)
+`)]
 ```
 
 ```js
