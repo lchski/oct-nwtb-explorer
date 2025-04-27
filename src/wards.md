@@ -6,7 +6,8 @@ theme: [light, wide]
 ```js
 import {to_pct, ch_incr_decr, summ_diff} from './lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
-import {wards} from './lib/maps.js'
+import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from './lib/maps.js'
+import {rewind} from "jsr:@nshiab/journalism/web"
 
 const level_of_detail = Generators.input(level_of_detail_input)
 ```
@@ -58,7 +59,8 @@ const ward_oi = view(Inputs.select([
         {
         id: "city",
         name: "Ottawa",
-        number: "all wards"
+        number: "all wards",
+        geometry: city_limits
         },
         ...ward_details
     ], {
@@ -122,7 +124,7 @@ Plot.plot({
 
 _The histogram cuts off ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'current').length} stop(s) in the current schedule and ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'new').length} stop(s) in the new schedule where buses arrive more than ${stop_times_oi_cutoff} times during the selected timeframe._
 
-Here are key measures for bus arrival frequency in ${ward_oi.name}:
+Here are key measures for bus arrival frequency at stops in ${ward_oi.name}:
 
 Measure   | Current     | New
 ---------- | ------------ | ----------
@@ -136,6 +138,47 @@ _A mean value of ${stop_times_oi_per_stop_summary_new.mean} indicates that the a
     <div class="tip" style="height: fit-content">These numbers are affected by the service options you make above (e.g., weekday, Saturday, Sunday)—change those to see how your service numbers change!</div>
 </div>
 
+```js
+// manually define what `map_control` expects
+const map_control_stub = {
+    ward: ward_oi,
+    roads: (ward_oi.id == 'city') ? 4 : 5
+}
+
+const stop_times_plot = Plot.plot({
+  width: Math.max(width, 550),
+  title: "Transit stops in Ottawa",
+  projection: {
+    type: "mercator",
+    domain: rewind(ward_oi.geometry),
+    inset: 10
+  },
+  color: {
+    legend: true,
+    scheme: "Observable10"
+    },
+  marks: [
+    ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control: map_control_stub }),
+    Plot.dot(stop_times_oi, Plot.group(
+        {r: "count"},
+        {
+            x: "stop_lon_normalized",
+            y: "stop_lat_normalized",
+            color: "source",
+            fill: "source",
+            title: d => `#${d.stop_code}: ${stops_oi.find(s => s.stop_code === d.stop_code).stop_name_normalized}`,
+            tip: true
+        }
+    ))
+  ]
+})
+```
+
+```js
+stop_times_plot
+```
+
+
 
 
 ## Compare wards
@@ -143,6 +186,9 @@ _A mean value of ${stop_times_oi_per_stop_summary_new.mean} indicates that the a
 TKTK, faceted by ward and source where possible (to visually compare service levels):
 - \# of stops
 - \# of stops in the top 10% frequency percentile
+
+
+
 
 <!-- ## Data / loading -->
 
@@ -166,7 +212,7 @@ WHERE
 
 ```js
 const stop_times_oi = [...await octdb.query(`
-SELECT * EXCLUDE(stop_lat_normalized, stop_lon_normalized)
+SELECT *
 FROM stop_times
 WHERE
   list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
