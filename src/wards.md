@@ -221,16 +221,23 @@ TKTK TODO: can we do just a _diff_ dot plot, i.e., plot dots where service doesn
 
 ## Compare wards
 
+
 ```js
 Plot.plot({
-    width,
+    title: `How many stops are there by ward?`,
+    subtitle: "Counts how many stops are active during selected service windows, current schedule vs. NWTB",
+    marginLeft: 200,
+    y: {axis: null, label: "Schedule"},
+    fy: {label: "Ward"},
+    x: {tickFormat: "s", grid: true},
+    color: {legend: true},
     marks: [
         Plot.barX(stops_by_ward.map(label_wards), Plot.group(
             {x: "count"},
             {
-                x: "source",
-                y: "ward",
-                fy: "source",
+                x: "ward",
+                y: "source",
+                fy: "ward",
                 fill: "source",
                 tip: {
                     pointer: "y",
@@ -246,7 +253,6 @@ Plot.plot({
 ```
 
 TKTK, faceted by ward and source where possible (to visually compare service levels):
-- \# of stops
 - \# of stops in the top 10% frequency percentile
 - \# of arrivals
 
