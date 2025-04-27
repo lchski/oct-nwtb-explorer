@@ -15,6 +15,16 @@ export default {
   //     ]
   //   }
   // ],
+  pages: [
+    {
+      name: "Explore by…",
+      pages: [
+        {name: "Wards", path: "/wards"},
+        {name: "Stops", path: "/stops"},
+        {name: "Maps", path: "/maps"},
+      ]
+    }
+  ],
 
   // Content to add to the head of the page, e.g. for a favicon:
   // head: '<link rel="icon" href="observable.png" type="image/png" sizes="32x32">',

@@ -12,6 +12,10 @@ import {rewind} from "jsr:@nshiab/journalism/web"
 const level_of_detail = Generators.input(level_of_detail_input)
 ```
 
+# Wards
+
+Explore the NWTB data by focusing on a ward at a time. See charts, summary statistics, maps comparing the old schedule to the new one.
+
 ## Choose service period
 
 ${service_period_desc}
@@ -191,7 +195,7 @@ const stop_times_plot = (ward_oi.id === 'city') ? '' : Plot.plot({
     ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control: map_control_stub }),
     Plot.dot(stop_times_oi, Plot.group(
         {r: "count"},
-        {// TODO: can we do just a _diff_, i.e., plot dots where service doesn’t change in a neutral colour, stops where there’s an increase in a positive colour, and stops where there’s a decrease in a negative colour—and size all the dots by the amount of service in the new schedule
+        {
             x: "stop_lon_normalized",
             y: "stop_lat_normalized",
             color: "source",
@@ -209,6 +213,8 @@ const stop_times_plot = (ward_oi.id === 'city') ? '' : Plot.plot({
 ```js
 (ward_oi.id !== 'city') ? stop_times_plot : htl.html`<figure><h2>Transit stops in Ottawa</h2><p><em>To see a map of stops, pick a specific ward.</em></p></figure>`
 ```
+
+TKTK TODO: can we do just a _diff_ dot plot, i.e., plot dots where service doesn’t change in a neutral colour, stops where there’s an increase in a positive colour, and stops where there’s a decrease in a negative colour—and size all the dots by the amount of service in the new schedule
 
 
 

@@ -10,6 +10,12 @@ import {service_period_desc, level_of_detail_input, selected_service_windows, se
 import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from './lib/maps.js'
 ```
 
+# Stops
+
+Explore the NWTB data by interacting with various maps.
+
+<small>_Note:_ There’s a lot of information in this data, and mapping it can be tricky—be sure to check out other sections, which have more focused maps of their own, to continue exploring the new schedule!</small>
+
 ## Choose service period
 
 ${service_period_desc}

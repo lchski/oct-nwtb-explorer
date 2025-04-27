@@ -12,6 +12,10 @@ import {wards} from './lib/maps.js'
 const level_of_detail = Generators.input(level_of_detail_input)
 ```
 
+# Stops
+
+Explore the NWTB data by focusing on transit stops of interest to you.
+
 ## Choose service period
 
 ${service_period_desc}
