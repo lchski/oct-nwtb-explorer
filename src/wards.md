@@ -143,35 +143,6 @@ Plot.plot({
     title: `How do arrival frequencies in ${ward_oi.name} differ across service windows?`,
     subtitle: "Counts how many times buses arrive at stops during the selected service windows, current schedule vs. NWTB",
     width: Math.max(width, 550),
-    marginLeft: 150,
-    y: {label: "Service window"},
-    marks: [
-        Plot.barX(stop_times_oi.map(label_service_windows), Plot.group(
-            {x: "count"},
-            {
-                x: "service_window",
-                y: "service_window",
-                fx: "source",
-                fill: "source",
-                tip: {
-                    pointer: "y",
-                    format: {
-                        fx: false,
-                        fill: false,
-                    }
-                }
-            }
-        )),
-        Plot.axisFx({label: "Schedule"})
-    ]
-})
-```
-
-```js
-Plot.plot({
-    title: `How do arrival frequencies in ${ward_oi.name} differ across service windows?`,
-    subtitle: "Counts how many times buses arrive at stops during the selected service windows, current schedule vs. NWTB",
-    width: Math.max(width, 550),
     x: {axis: null, label: "Schedule"},
     fx: {label: "Schedule"},
     y: {tickFormat: "s", grid: true},
