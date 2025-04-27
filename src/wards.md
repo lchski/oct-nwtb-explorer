@@ -229,7 +229,7 @@ Plot.plot({
     marginLeft: 200,
     y: {axis: null, label: "Schedule"},
     fy: {label: "Ward"},
-    x: {tickFormat: "s", grid: true},
+    x: {label: "Number of stops", tickFormat: "s", grid: true},
     color: {legend: true},
     marks: [
         Plot.barX(stops_by_ward.map(label_wards), Plot.group(
