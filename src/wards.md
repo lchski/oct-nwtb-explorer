@@ -4,7 +4,7 @@ theme: [light, wide]
 ---
 
 ```js
-import {to_pct, ch_incr_decr, summ_diff} from './lib/helpers.js'
+import {to_pct, ch_incr_decr, summ_diff, label_service_windows} from './lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
 import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from './lib/maps.js'
 import {rewind} from "jsr:@nshiab/journalism/web"
@@ -137,6 +137,65 @@ _A mean value of ${stop_times_oi_per_stop_summary_new.mean} indicates that the a
 </div>
     <div class="tip" style="height: fit-content">These numbers are affected by the service options you make above (e.g., weekday, Saturday, Sunday)—change those to see how your service numbers change!</div>
 </div>
+
+```js
+Plot.plot({
+    title: `How do arrival frequencies in ${ward_oi.name} differ across service windows?`,
+    subtitle: "Counts how many times buses arrive at stops during the selected service windows, current schedule vs. NWTB",
+    width: Math.max(width, 550),
+    marginLeft: 150,
+    y: {label: "Service window"},
+    marks: [
+        Plot.barX(stop_times_oi.map(label_service_windows), Plot.group(
+            {x: "count"},
+            {
+                x: "service_window",
+                y: "service_window",
+                fx: "source",
+                fill: "source",
+                tip: {
+                    pointer: "y",
+                    format: {
+                        fx: false,
+                        fill: false,
+                    }
+                }
+            }
+        )),
+        Plot.axisFx({label: "Schedule"})
+    ]
+})
+```
+
+```js
+Plot.plot({
+    title: `How do arrival frequencies in ${ward_oi.name} differ across service windows?`,
+    subtitle: "Counts how many times buses arrive at stops during the selected service windows, current schedule vs. NWTB",
+    width: Math.max(width, 550),
+    x: {axis: null, label: "Schedule"},
+    fx: {label: "Schedule"},
+    y: {tickFormat: "s", grid: true},
+    color: {legend: true},
+    marks: [
+        Plot.barY(stop_times_oi.map(label_service_windows), Plot.group(
+            {y: "count"},
+            {
+                y: "service_window",
+                x: "source",
+                fx: "service_window",
+                fill: "source",
+                tip: {
+                    pointer: "x",
+                    format: {
+                        fx: false,
+                        fill: false,
+                    }
+                }
+            }
+        ))
+    ]
+})
+```
 
 ```js
 // manually define what `map_control` expects
