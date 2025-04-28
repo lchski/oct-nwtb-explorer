@@ -149,7 +149,7 @@ Plot.plot({
     width: Math.max(width, 550),
     x: {axis: null, label: "Schedule"},
     fx: {label: "Schedule"},
-    y: {tickFormat: "s", grid: true},
+    y: {label: "Arrival frequency", tickFormat: "s", grid: true},
     color: {legend: true},
     marks: [
         Plot.barY(stop_times_oi.map(label_service_windows), Plot.group(
@@ -220,6 +220,8 @@ TKTK TODO: can we do just a _diff_ dot plot, i.e., plot dots where service doesn
 
 
 ## Compare wards
+
+This section isn’t affected by the ward you choose. Instead, it compares service across all wards.
 
 <div class="grid grid-cols-2">
     <div class="card">${stops_by_ward_plot}</div>
