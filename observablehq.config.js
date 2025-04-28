@@ -23,6 +23,13 @@ export default {
         {name: "Stops", path: "/stops"},
         {name: "Maps", path: "/maps"},
       ]
+    },
+    {
+      name: "Learn more about…",
+      pages: [
+        {name: "Methodology", path: "/about/methodology"},
+        {name: "Data", path: "/about/data"}
+      ]
     }
   ],
 
