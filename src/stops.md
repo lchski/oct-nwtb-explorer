@@ -122,6 +122,32 @@ Plot.plot({
 })
 ```
 
+```js
+Plot.plot({
+    title: `How long do you have to wait for your next train / bus at your selected stops?`,
+    subtitle: `Wait times`,
+    width,
+    x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
+    y: {label: "Number of stop times", tickFormat: "s", grid: true},
+    marks: [
+        Plot.rectY(stop_times_oi, Plot.binX({y: "count"}, {
+            x: "s_until_next_arrival",
+            fill: "source",
+            fx: "source",
+            interval: 5 * 60, // we format from seconds to minutes, so do the equivalent here
+            tip: {
+                pointer: "x",
+                format: {
+                    fx: false,
+                    fill: false,
+                }
+            }
+        })),
+        Plot.axisFx({label: "Schedule"})
+    ]
+})
+```
+
 <!-- For each stop...
     For each source...
         For each route...
@@ -139,12 +165,18 @@ const route_at_stop_output = (routes_at_this_stop, route_direction_ids) => {
     return html.fragment`
         ${route_direction_ids.map(this_route_direction_id => {
             const route_details = routes_at_this_stop.filter(d => d.route_direction_id === this_route_direction_id)
+            const s_avg_wait = route_waittimes_at_stops.find(d => d.route_direction_id === this_route_direction_id && d.source === route_details[0].source && d.stop_code === route_details[0].stop_code).s_avg_wait
+
+            
+
+            console.log("rd", route_details)
 
             return html.fragment`
                 <tr>
                     <td>${route_details[0].route_id}</td>
                     <td>${[... new Set(route_details.map(d => d.trip_headsign))].join(' // ')}</td>
                     <td>${d3.sum(route_details, d => d.n_arrivals)}</td>
+                    <td>${(null === s_avg_wait) ? '-' : Math.round(s_avg_wait / 60)}</td>
                 </tr>
             `
         })}
@@ -175,6 +207,7 @@ const routes_at_stops_output = stops_oi.map(stop_oi => {
                                 <th>Route</th>
                                 <th>Direction (combines route labels)</th>
                                 <th>Arrivals (#)</th>
+                                <th>Wait (mins, avg)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -190,6 +223,7 @@ const routes_at_stops_output = stops_oi.map(stop_oi => {
                                 <th>Route</th>
                                 <th>Direction (combines route labels)</th>
                                 <th>Arrivals (#)</th>
+                                <th>Wait (mins, avg)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -261,6 +295,52 @@ GROUP BY
     trip_headsign
 ORDER BY
     stop_code, source, route_id, direction_id, trip_headsign
+`)]
+
+const route_waittimes_at_stops = [...await octdb.query(`
+SELECT
+    stop_code,
+    source,
+    route_id,
+    direction_id,
+    concat(route_id, '-', direction_id) AS route_direction_id,
+    avg(s_until_next_arrival) AS s_avg_wait
+FROM stop_times
+WHERE
+  list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
+  list_contains(${array_to_sql_qry_array(selected_service_ids(level_of_detail))}, service_id) AND
+  list_contains(${array_to_sql_qry_array(stop_codes_oi)}, stop_code)
+GROUP BY
+    stop_code,
+    source,
+    route_id,
+    direction_id
+ORDER BY
+    stop_code, source, route_id, direction_id
+`)]
+
+const route_waittimes_at_stops_by_window = [...await octdb.query(`
+SELECT
+    stop_code,
+    source,
+    route_id,
+    direction_id,
+    service_window,
+    concat(route_id, '-', direction_id) AS route_direction_id,
+    avg(s_until_next_arrival) AS s_avg_wait
+FROM stop_times
+WHERE
+  list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
+  list_contains(${array_to_sql_qry_array(selected_service_ids(level_of_detail))}, service_id) AND
+  list_contains(${array_to_sql_qry_array(stop_codes_oi)}, stop_code)
+GROUP BY
+    stop_code,
+    source,
+    route_id,
+    direction_id,
+    service_window
+ORDER BY
+    stop_code, source, route_id, direction_id, service_window
 `)]
 ```
 
