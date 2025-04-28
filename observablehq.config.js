@@ -28,7 +28,8 @@ export default {
       name: "Learn more about…",
       pages: [
         {name: "Methodology", path: "/about/methodology"},
-        {name: "Data", path: "/about/data"}
+        {name: "Data", path: "/about/data"},
+        {name: "Author", path: "/about/author"}
       ]
     }
   ],
