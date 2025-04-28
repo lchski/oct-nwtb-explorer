@@ -134,6 +134,7 @@ const level_of_detail = Generators.input(level_of_detail_input)
 const viewer_plot = Plot.plot({
   width: Math.max(width, 550),
   title: "Transit stops in Ottawa",
+  subtitle: "Colour indicates the extent of change (dark red means a big decrease, dark blue a big increase). Size indicates how often buses or trains arrive at the stop in the NWTB schedule.",
   projection: {
     type: "mercator",
     domain: get_map_domain({ map_control, manual_map_control, city_limits }),
@@ -142,7 +143,8 @@ const viewer_plot = Plot.plot({
   color: {
     type: "diverging",
     scheme: "RdBu",
-    legend: true
+    legend: true,
+    label: "Change rank"
   },
   marks: [
     ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control }),
@@ -162,7 +164,7 @@ const viewer_plot = Plot.plot({
           "Stop frequency (new)": d => d.n_stops_new,
           "Difference (new vs current)": d => d.n_stops_difference,
           "% change": d => d.is_new_stop ? "n/a (new stop)" : Math.round(d.pct_stops_difference * 1000) / 10,
-          "Change rank": d => d.ranking
+          // "Change rank": d => d.ranking
         },
         tip: {format: {
           x: false,
