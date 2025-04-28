@@ -214,7 +214,7 @@ const stop_times_plot = (ward_oi.id === 'city') ? '' : Plot.plot({
 (ward_oi.id !== 'city') ? stop_times_plot : htl.html`<figure><h2>Transit stops in Ottawa</h2><p><em>To see a map of stops, pick a specific ward.</em></p></figure>`
 ```
 
-TKTK TODO: can we do just a _diff_ dot plot, i.e., plot dots where service doesn’t change in a neutral colour, stops where there’s an increase in a positive colour, and stops where there’s a decrease in a negative colour—and size all the dots by the amount of service in the new schedule
+<!-- TKTK TODO: can we do just a _diff_ dot plot, i.e., plot dots where service doesn’t change in a neutral colour, stops where there’s an increase in a positive colour, and stops where there’s a decrease in a negative colour—and size all the dots by the amount of service in the new schedule -->
 
 
 

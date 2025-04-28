@@ -45,7 +45,7 @@ const stop_table = Inputs.table(stop_search, {
         "ward_number"
     ],
     header: {
-        stop_code: "Stop code",
+        stop_code: "Code",
         stop_name_normalized: "Stop name",
         ward_number: "Ward"
     },
@@ -53,7 +53,8 @@ const stop_table = Inputs.table(stop_search, {
         ward_number: x => `${x} – ${ward_details.find(w => w.number == x).name}`
     },
     width: {
-        stop_code: 80
+        stop_code: 50,
+        ward_number: 100
     },
     select: false
 })

@@ -14,7 +14,7 @@ import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, 
 
 Explore the NWTB data by interacting with various maps.
 
-<small>_Note:_ There’s a lot of information in this data, and mapping it can be tricky—be sure to check out other sections, which have more focused maps of their own, to continue exploring the new schedule!</small>
+<small>_Note:_ There’s a lot of information in this data, and mapping it can be tricky—be sure to check out other sections, which have more focused maps of their own, to continue exploring the new schedule! Of all the pages on the site, <strong>this page is the likeliest to error out on phones or other smaller devices</strong>—my apologies for that!</small>
 
 ## Choose service period
 
