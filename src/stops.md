@@ -5,7 +5,7 @@ toc: false
 ---
 
 ```js
-import {to_pct, ch_incr_decr} from './lib/helpers.js'
+import {to_pct, ch_incr_decr, label_service_windows} from './lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
 import {wards} from './lib/maps.js'
 
@@ -89,7 +89,37 @@ const stops_oi = stops.filter(s => stop_codes_oi.includes(s.stop_code))
 <div class="tip">The following numbers are affected by the schedule options you make above (e.g., weekday, Saturday, Sunday)—change those to see how your service changes!</div>
 </div>
 
-Buses currently stop ${stop_times_oi_summary.current.n.toLocaleString()} times at your ${stops_oi.length.toLocaleString()} selected stop(s). Under the new schedule, they’ll stop ${stop_times_oi_summary.new.n.toLocaleString()} times (${ch_incr_decr(stop_times_oi_summary.new.n_change, true)}${Math.abs(stop_times_oi_summary.new.n_change)}, a ${stop_times_oi_summary.new.pct_change}% change).
+Buses or trains currently stop ${stop_times_oi_summary.current.n.toLocaleString()} times at your ${stops_oi.length.toLocaleString()} selected stop(s). Under the new schedule, they’ll stop ${stop_times_oi_summary.new.n.toLocaleString()} times (${ch_incr_decr(stop_times_oi_summary.new.n_change, true)}${Math.abs(stop_times_oi_summary.new.n_change)}, a ${stop_times_oi_summary.new.pct_change}% change).
+
+```js
+Plot.plot({
+    title: `How do arrival frequencies at your selected stop(s) differ across service windows?`,
+    subtitle: "Counts how many times buses or trains arrive at the stop(s) during the selected service windows, current schedule vs. NWTB",
+    width: Math.max(width, 550),
+    x: {axis: null, label: "Schedule"},
+    fx: {label: "Schedule"},
+    y: {label: "Arrival frequency", tickFormat: "s", grid: true},
+    color: {legend: true},
+    marks: [
+        Plot.barY(stop_times_oi.map(label_service_windows), Plot.group(
+            {y: "count"},
+            {
+                y: "service_window",
+                x: "source",
+                fx: "service_window",
+                fill: "source",
+                tip: {
+                    pointer: "x",
+                    format: {
+                        fx: false,
+                        fill: false,
+                    }
+                }
+            }
+        ))
+    ]
+})
+```
 
 <!-- ## Data / loading -->
 
@@ -109,15 +139,6 @@ FROM stops
 `)]
 ```
 
-```js
-const stop_times = [...await octdb.query(`
-SELECT *
-FROM stop_times
-WHERE
-  list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
-  list_contains(${array_to_sql_qry_array(selected_service_ids(level_of_detail))}, service_id)
-`)]
-```
 
 ```js
 const stop_times_oi = [...await octdb.query(`
