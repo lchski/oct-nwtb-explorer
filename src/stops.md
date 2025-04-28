@@ -121,6 +121,103 @@ Plot.plot({
 })
 ```
 
+For each stop...
+    For each source...
+        For each route...
+            For each direction_id...
+                label: headsigns
+                What are the n_arrivals?
+                    ...across service windows?
+                What is the average wait between arrivals?
+                    ...across service windows?
+
+```js
+const route_at_stop_output = (routes_at_this_stop, route_direction_ids) => {
+    const route_details = routes_at_this_stop.filter(d => route_direction_ids.includes(d.route_direction_id))
+
+    return html.fragment`
+        ${route_direction_ids.map(this_route_direction_id => {
+            const route_details = routes_at_this_stop.filter(d => d.route_direction_id === this_route_direction_id)
+
+            return html.fragment`
+                <tr>
+                    <td>${route_details[0].route_id}</td>
+                    <td>${[... new Set(route_details.map(d => d.trip_headsign))].join(' // ')}</td>
+                    <td>${d3.sum(route_details, d => d.n_arrivals)}</td>
+                </tr>
+            `
+        })}
+    `
+}
+
+const routes_at_stops_output = stops_oi.map(stop_oi => {
+    const routes_at_this_stop = routes_at_stops.filter(d => d.stop_code === stop_oi.stop_code).map(d => ({...d, route_direction_id: `${d.route_id}-${d.direction_id}`}))
+
+    const routes_at_this_stop_vals = {
+        current: {
+            route_direction_ids: [...new Set(routes_at_this_stop.filter(d => d.source == "current").map(d => `${d.route_id}-${d.direction_id}`))]
+        },
+        new: {
+            route_direction_ids: [...new Set(routes_at_this_stop.filter(d => d.source == "new").map(d => `${d.route_id}-${d.direction_id}`))]
+        }
+    }
+
+    return html`
+        <div>
+            <h3>${stop_oi.stop_code} – ${stop_oi.stop_name_normalized}</h3>
+            <div class="grid grid-cols-2">
+                <div class="card">
+                    <h4>Current</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Route</th>
+                                <th>Direction (combines route labels)</th>
+                                <th>Arrivals (#)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        ${route_at_stop_output(routes_at_this_stop.filter(d => d.source === "current"), routes_at_this_stop_vals.current.route_direction_ids)}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card">
+                    <h4>NWTB</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Route</th>
+                                <th>Direction (combines route labels)</th>
+                                <th>Arrivals (#)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        ${route_at_stop_output(routes_at_this_stop.filter(d => d.source === "new"), routes_at_this_stop_vals.new.route_direction_ids)}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+`
+})
+```
+
+<div>
+${routes_at_stops_output}
+</div>
+
+
+```js
+const routes_at_stops_vals = {
+    current: {
+        route_direction_ids: [...new Set(routes_at_stops.filter(d => d.source == "current").map(d => `${d.route_id}-${d.direction_id}`))]
+    },
+    new: {
+        route_direction_ids: [...new Set(routes_at_stops.filter(d => d.source == "new").map(d => `${d.route_id}-${d.direction_id}`))]
+    }
+}
+```
+
 <!-- ## Data / loading -->
 
 <!-- ### Database -->
@@ -136,6 +233,33 @@ SELECT
     stop_name_normalized,
     ward_number::INTEGER AS ward_number
 FROM stops
+`)]
+```
+
+```js
+const routes_at_stops = [...await octdb.query(`
+SELECT
+    stop_code,
+    source,
+    service_window,
+    route_id,
+    direction_id,
+    trip_headsign,
+    COUNT(*) AS n_arrivals
+FROM stop_times
+WHERE
+  list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
+  list_contains(${array_to_sql_qry_array(selected_service_ids(level_of_detail))}, service_id) AND
+  list_contains(${array_to_sql_qry_array(stop_codes_oi)}, stop_code)
+GROUP BY
+    stop_code,
+    source,
+    service_window,
+    route_id,
+    direction_id,
+    trip_headsign
+ORDER BY
+    stop_code, source, route_id, direction_id, trip_headsign
 `)]
 ```
 
