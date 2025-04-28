@@ -18,4 +18,7 @@ You can explore the new network from a few angles:
 
 ## To keep in mind
 
-This was prepared just before the routing change went into effect, so the site uses the language of “current” and “new”. I’ll fix that shortly, but for now, keep in mind—“current” refers to pre-April 27, 2025, while “new” refers to the NWTB schedule.
+- “Weekday”, “Saturday”, and “Sunday” schedules are based on the following:
+    - Current: April 11, 12, and 13, 2025
+    - NWTB: May 9, 10, and 11, 2025
+- This was prepared just before the routing change went into effect, so the site uses the language of “current” and “new”. I’ll fix that shortly, but for now, keep in mind—“current” refers to pre-April 27, 2025, while “new” refers to the NWTB schedule.
