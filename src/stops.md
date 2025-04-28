@@ -121,15 +121,15 @@ Plot.plot({
 })
 ```
 
-For each stop...
+<!-- For each stop...
     For each source...
         For each route...
             For each direction_id...
                 label: headsigns
                 What are the n_arrivals?
-                    ...across service windows?
-                What is the average wait between arrivals?
-                    ...across service windows?
+                    TODO: ...across service windows?
+                TODO: What is the average wait between arrivals?
+                    ...across service windows? -->
 
 ```js
 const route_at_stop_output = (routes_at_this_stop, route_direction_ids) => {
