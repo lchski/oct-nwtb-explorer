@@ -232,11 +232,15 @@ This section isn’t affected by the ward you choose. Instead, it compares servi
 const stops_by_ward_plot = Plot.plot({
     title: `How many stops are there by ward?`,
     subtitle: "Counts how many stops are active during selected service windows, current schedule vs. NWTB",
-    marginLeft: 200,
+    marginLeft: 250,
+    marginBottom: 40,
     y: {axis: null, label: "Schedule"},
     fy: {label: "Ward"},
     x: {label: "Number of stops", tickFormat: "s", grid: true},
     color: {legend: true},
+    style: {
+        fontSize: '1em',
+    },
     marks: [
         Plot.barX(stops_by_ward.map(label_wards), Plot.group(
             {x: "count"},
@@ -262,11 +266,15 @@ const stops_by_ward_plot = Plot.plot({
 const arrivals_by_ward_plot = Plot.plot({
     title: `How many arrivals, by ward?`,
     subtitle: "Counts how many times buses or trains arrive during selected service windows, current schedule vs. NWTB",
-    marginLeft: 200,
+    marginLeft: 250,
+    marginBottom: 40,
     y: {axis: null, label: "Schedule"},
     fy: {label: "Ward"},
     x: {label: "Arrival frequency", tickFormat: "s", grid: true},
     color: {legend: true},
+    style: {
+        fontSize: '1em',
+    },
     marks: [
         Plot.barX(arrivals_by_ward.map(label_wards), Plot.group(
             {x: "count"},

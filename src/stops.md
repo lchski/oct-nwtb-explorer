@@ -125,16 +125,17 @@ Plot.plot({
 ```js
 Plot.plot({
     title: `How long do you have to wait for your next train / bus at your selected stops?`,
-    subtitle: `Wait times`,
+    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than 90 minutes), current schedule vs. NWTB`,
     width,
     x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
-    y: {label: "Number of stop times", tickFormat: "s", grid: true},
+    y: {label: "Frequency", tickFormat: "s", grid: true},
     marks: [
         Plot.rectY(stop_times_oi, Plot.binX({y: "count"}, {
             x: "s_until_next_arrival",
             fill: "source",
             fx: "source",
             interval: 5 * 60, // we format from seconds to minutes, so do the equivalent here
+            domain: [0, 90 * 60],
             tip: {
                 pointer: "x",
                 format: {
@@ -174,7 +175,7 @@ const route_at_stop_output = (routes_at_this_stop, route_direction_ids) => {
             return html.fragment`
                 <tr>
                     <td>${route_details[0].route_id}</td>
-                    <td>${[... new Set(route_details.map(d => d.trip_headsign))].join(' // ')}</td>
+                    <td>${[... new Set(route_details.sort((a, b) => a.n_arrivals <= b.n_arrivals).map(d => d.trip_headsign))].join(' // ')}</td>
                     <td>${d3.sum(route_details, d => d.n_arrivals)}</td>
                     <td>${(null === s_avg_wait) ? '-' : Math.round(s_avg_wait / 60)}</td>
                 </tr>
