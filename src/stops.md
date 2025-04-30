@@ -62,7 +62,7 @@ const stop_table = Inputs.table(stop_search, {
 
 ```js
 const stop_codes_oi_raw = view(Inputs.text({
-    label: "Stop code(s) of interest",
+    label: "Stop code(s) of interest (put a space between to enter multiple)",
     placeholder: "e.g., enter just “3011” for Tunney’s Pasture",
     submit: true
 }))
@@ -149,7 +149,7 @@ Plot.plot({
 })
 ```
 
-This plot shows _all_ the wait times at a stop. If your stop has multiple routes serving it, see the tables below for average wait times by route.
+This plot shows _all_ the wait times at your stop(s). If multiple routes serve the stop(s), see the tables below for average wait times by route.
 
 <!-- For each stop...
     For each source...
