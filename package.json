@@ -9,6 +9,7 @@
     "observable": "observable"
   },
   "dependencies": {
+    "@duckdb/node-api": "^1.2.2-alpha.18",
     "@observablehq/framework": "^1.13.3"
   },
   "devDependencies": {

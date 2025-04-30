@@ -1,3 +1,10 @@
+import { DuckDBInstance } from '@duckdb/node-api';
+
+const duckdb_instance = await DuckDBInstance.create()
+const octdb = await duckdb_instance.connect()
+
+await octdb.run(`CREATE TABLE routes AS SELECT * FROM read_parquet('./src/data/octranspo.com/routes.parquet')`)
+
 // See https://observablehq.com/framework/config for documentation.
 export default {
   // The app’s title; used in the sidebar and webpage titles.
@@ -33,6 +40,13 @@ export default {
       ]
     }
   ],
+  async *dynamicPaths() {
+    const route_ids = await octdb.runAndReadAll(`SELECT DISTINCT route_id FROM routes`)
+
+    for await (const {route_id} of route_ids.getRowObjects()) {
+      yield `/routes/${route_id}`;
+    }
+  },
 
   // Content to add to the head of the page, e.g. for a favicon:
   // head: '<link rel="icon" href="observable.png" type="image/png" sizes="32x32">',
@@ -41,7 +55,7 @@ export default {
   root: "src",
 
   // Some additional configuration options and their defaults:
-  // theme: "default", // try "light", "dark", "slate", etc.
+  theme: "light", // try "light", "dark", "slate", etc.
   // header: "", // what to show in the header (HTML)
   // footer: "Built with Observable.", // what to show in the footer (HTML)
   // sidebar: true, // whether to show the sidebar
