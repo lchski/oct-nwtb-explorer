@@ -90,6 +90,65 @@ Buses or trains arrive at these stops ${stop_times_oi_summary.new.n.toLocaleStri
 </div>
 
 ```js
+Plot.plot({
+    title: `How long do you have to wait for your next train / bus in ${ward_oi.name}?`,
+    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than 45 minutes), current schedule vs. NWTB`,
+    width,
+    x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
+    y: {label: "Percentage (%)", percent: true, grid: true},
+    marks: [
+        Plot.rectY(stop_times_oi, Plot.binX({y: "proportion-facet"}, {
+            x: "s_until_next_arrival",
+            fill: "source",
+            fx: "source",
+            interval: 5 * 60, // we format from seconds to minutes, so do the equivalent here
+            domain: [0, 45 * 60],
+            tip: {
+                pointer: "x",
+                format: {
+                    fx: false,
+                    fill: false,
+                }
+            }
+        })),
+        Plot.axisFx({label: "Schedule"})
+    ]
+})
+```
+
+```js
+const wait_time_summary = {
+    current: {
+        min: Math.round(d3.min(stop_times_oi_current, d => d.s_until_next_arrival) / 60),
+        max: Math.round(d3.max(stop_times_oi_current, d => d.s_until_next_arrival) / 60),
+        mean: Math.round(d3.mean(stop_times_oi_current, d => d.s_until_next_arrival) / 60),
+        median: Math.round(d3.median(stop_times_oi_current, d => d.s_until_next_arrival / 60))
+    },
+    new: {
+        min: Math.round(d3.min(stop_times_oi_new, d => d.s_until_next_arrival) / 60),
+        max: Math.round(d3.max(stop_times_oi_new, d => d.s_until_next_arrival) / 60),
+        mean: Math.round(d3.mean(stop_times_oi_new, d => d.s_until_next_arrival) / 60),
+        median: Math.round(d3.median(stop_times_oi_new, d => d.s_until_next_arrival / 60))
+    }
+}
+```
+
+<div class="grid grid-cols-2">
+    <div>
+
+Here are key measures for wait times in ${ward_oi.name} (in minutes):
+
+Measure   | Current     | New
+---------- | ------------ | ----------
+Range   | ${wait_time_summary.current.min} to ${wait_time_summary.current.max} | ${wait_time_summary.new.min} to ${wait_time_summary.new.max}
+Mean   | ${wait_time_summary.current.mean} | ${wait_time_summary.new.mean} (${summ_diff(wait_time_summary.current.mean, wait_time_summary.new.mean)})
+Median   | ${wait_time_summary.current.median} | ${wait_time_summary.new.median} (${summ_diff(wait_time_summary.current.median, wait_time_summary.new.median)})
+
+</div>
+    <div class="tip" style="height: fit-content">These numbers are affected by the service options you make above (e.g., weekday, Saturday, Sunday)—change those to see how your service numbers change!</div>
+</div>
+
+```js
 const stop_times_oi_cutoff = 300
 
 const stop_times_oi_per_stop_above_cutoff = stop_times_oi_per_stop.filter(s => s.n_stop_times > stop_times_oi_cutoff)
@@ -123,9 +182,6 @@ Plot.plot({
 })
 ```
 
-<div class="grid grid-cols-2">
-    <div>
-
 _The histogram cuts off ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'current').length} stop(s) in the current schedule and ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'new').length} stop(s) in the new schedule where buses or trains arrive more than ${stop_times_oi_cutoff} times during the selected timeframe._
 
 Here are key measures for arrival frequency at stops in ${ward_oi.name}:
@@ -137,10 +193,6 @@ Mean   | ${stop_times_oi_per_stop_summary_current.mean} | ${stop_times_oi_per_st
 Median   | ${stop_times_oi_per_stop_summary_current.median} | ${stop_times_oi_per_stop_summary_new.median} (${summ_diff(stop_times_oi_per_stop_summary_current.median, stop_times_oi_per_stop_summary_new.median)})
 
 _A mean value of ${stop_times_oi_per_stop_summary_new.mean} indicates that the average stop in ${ward_oi.name} has ${stop_times_oi_per_stop_summary_new.mean} arrivals during the service period you’ve selected above. Some stops will have more frequent arrivals, and others less frequent, as indicated by the range value._
-
-</div>
-    <div class="tip" style="height: fit-content">These numbers are affected by the service options you make above (e.g., weekday, Saturday, Sunday)—change those to see how your service numbers change!</div>
-</div>
 
 ```js
 Plot.plot({
@@ -367,12 +419,15 @@ GROUP BY
     stop_code
 `)]
 
+const stop_times_oi_current = stop_times_oi.filter(st => st.source === "current")
+const stop_times_oi_new = stop_times_oi.filter(st => st.source === "new")
+
 let stop_times_oi_summary = {
     current: {
-		n: stop_times_oi.filter(st => st.source === "current").length,
+		n: stop_times_oi_current.length,
 	},
 	new: {
-		n: stop_times_oi.filter(st => st.source === "new").length,
+		n: stop_times_oi_new.length,
 	},
 }
 

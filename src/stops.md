@@ -125,17 +125,17 @@ Plot.plot({
 ```js
 Plot.plot({
     title: `How long do you have to wait for your next train / bus at your selected stops?`,
-    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than 90 minutes), current schedule vs. NWTB`,
+    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than 45 minutes), current schedule vs. NWTB`,
     width,
     x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
-    y: {label: "Frequency", tickFormat: "s", grid: true},
+    y: {label: "Percentage (%)", percent: true, grid: true},
     marks: [
-        Plot.rectY(stop_times_oi, Plot.binX({y: "count"}, {
+        Plot.rectY(stop_times_oi, Plot.binX({y: "proportion-facet"}, {
             x: "s_until_next_arrival",
             fill: "source",
             fx: "source",
             interval: 5 * 60, // we format from seconds to minutes, so do the equivalent here
-            domain: [0, 90 * 60],
+            domain: [0, 45 * 60],
             tip: {
                 pointer: "x",
                 format: {
