@@ -83,8 +83,35 @@ view(Inputs.table(routes.map(label_schedules).map(label_route_ids), {
 
 ## Details for route ${route_id_oi_pretty}
 
+```js
+const get_route_id_oi_sources = () => {
+    const unique_sources = [...new Set(stop_times_oi.map(st => st.source))]
+
+    if (unique_sources.length === 2) {
+        return 'both'
+    }
+
+    return unique_sources[0]
+}
+
+const describe_route_id_oi_sources = () => {
+    const route_id_oi_sources = get_route_id_oi_sources()
+
+    if (route_id_oi_sources === "both") {
+        return html`Route ${route_id_oi_pretty} is active in <strong>both schedules</strong>.`
+    }
+
+    if (route_id_oi_sources === "current") {
+        return html`Route ${route_id_oi_pretty} was only active in <strong>the previous schedule</strong>.`
+    }
+
+    return html`Route ${route_id_oi_pretty} is only active in <strong>the current schedule</strong>.`
+}
+```
+
 <div class="caution">
     <p>Most routes have changed with NWTB. Some routes only exist in the previous schedule, others only in the new one. For routes that exist in both, the routing and stops may have changed. Because of this, direct comparisons may not always be useful, or may only show one of the two schedules.</p>
+    <p>${describe_route_id_oi_sources()}</p>
 </div>
 
 ```js
@@ -230,10 +257,6 @@ FROM stops
 WHERE
     list_contains(${array_to_sql_qry_array([...new Set(stop_times_oi.map(st => st.stop_code))])}, stop_code)
 `)]
-```
-
-```js
-stops_oi
 ```
 
 ```js
