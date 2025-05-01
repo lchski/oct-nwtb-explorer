@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@duckdb/node-api": "^1.2.2-alpha.18",
-    "@observablehq/framework": "^1.13.3"
+    "@observablehq/framework": "^1.13.3",
+    "markdown-it-footnote": "^4.0.0"
   },
   "devDependencies": {
     "rimraf": "^5.0.5"

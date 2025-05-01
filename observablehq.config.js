@@ -1,3 +1,4 @@
+import MarkdownItFootnote from "markdown-it-footnote";
 import { DuckDBInstance } from '@duckdb/node-api';
 
 const duckdb_instance = await DuckDBInstance.create()
@@ -67,4 +68,5 @@ export default {
   // typographer: false, // smart quotes and other typographic improvements
   // preserveExtension: false, // drop .html from URLs
   // preserveIndex: false, // drop /index from URLs
+  markdownIt: (md) => md.use(MarkdownItFootnote),
 };
