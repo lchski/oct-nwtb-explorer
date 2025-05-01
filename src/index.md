@@ -20,6 +20,7 @@ You can explore the new network from a few angles:
 
 - **“stop”**: a physical train or bus stop, usually with a sign and a code (like 3011, Tunney’s Pasture)
 - **“arrival”**: a single time when a train or bus arrives at a stop to take on passengers[^stop]
+- **“arrival frequency”**: how busy a stop is—for a given window, do buses arrive only 10 times, or 100 times? 
 
 ## To keep in mind
 
