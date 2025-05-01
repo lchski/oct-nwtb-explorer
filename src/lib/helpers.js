@@ -148,3 +148,25 @@ export const label_schedules = (row) => {
 	
 	return newRow;
 };
+
+export const label_route_ids = (row) => {
+	const newRow = { ...row };
+	
+	switch (newRow.route_id) {
+		case '1-350':
+			newRow.route_id = 1;
+			break;
+		case '2-354':
+			newRow.route_id = 2;
+			break;
+		case '4-354':
+			newRow.route_id = 4;
+			break;
+		default:
+			newRow.route_id = Number(newRow.route_id);
+			break;
+	}
+	
+	return newRow;
+};
+
