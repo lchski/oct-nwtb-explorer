@@ -6,7 +6,8 @@ toc: false
 ```js
 import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids} from './lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
-import {wards} from './lib/maps.js'
+import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from './lib/maps.js'
+import {rewind} from "jsr:@nshiab/journalism/web"
 
 const level_of_detail = Generators.input(level_of_detail_input)
 ```
@@ -52,11 +53,13 @@ const get_route_id_oi = () => {
 }
 
 const route_id_oi = get_route_id_oi()
+
+const route_id_oi_pretty = [{route_id: route_id_oi}].map(label_route_ids)[0].route_id
 ```
 
 
 ```js
-const selected_route = view(Inputs.table(routes.map(label_schedules).map(label_route_ids), {
+view(Inputs.table(routes.map(label_schedules).map(label_route_ids), {
     columns: [
         "source",
         "route_id",
@@ -67,15 +70,120 @@ const selected_route = view(Inputs.table(routes.map(label_schedules).map(label_r
         source: "Schedule",
         route_id: "Route #",
         most_common_headsign: "Direction",
-        total_trips: "Trips (#, total)"
+        total_trips: "Trips (total all days / times)"
     },
     width: {
-        stop_code: 50,
-        ward_number: 100
+        source: 150
     },
     sort: "route_id",
     select: false
 }))
+```
+
+
+## Details for route ${route_id_oi_pretty}
+
+<div class="caution">
+    <p>Most routes have changed with NWTB. Some routes only exist in the previous schedule, others only in the new one. For routes that exist in both, the routing and stops may have changed. Because of this, direct comparisons may not always be useful, or may only show one of the two schedules.</p>
+</div>
+
+```js
+Plot.plot({
+    title: `How do arrival frequencies for the #${route_id_oi_pretty} differ across service windows?`,
+    subtitle: "Counts how many times buses or trains arrive on this route during the selected service windows, previous schedule vs. NWTB",
+    width: Math.max(width, 550),
+    x: {axis: null, label: "Schedule"},
+    fx: {label: "Schedule"},
+    y: {label: "Arrival frequency", tickFormat: "s", grid: true},
+    color: {legend: true},
+    marks: [
+        Plot.barY(stop_times_oi.map(label_service_windows).map(label_schedules), Plot.group(
+            {y: "count"},
+            {
+                y: "service_window",
+                x: "source",
+                fx: "service_window",
+                fill: "source",
+                tip: {
+                    pointer: "x",
+                    format: {
+                        fx: false,
+                        fill: false,
+                    }
+                }
+            }
+        ))
+    ]
+})
+```
+
+```js
+Plot.plot({
+    title: `How long do you have to wait for the #${route_id_oi_pretty}?`,
+    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than 45 minutes), previous schedule vs. NWTB`,
+    width,
+    x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
+    y: {label: "Percentage (%)", percent: true, grid: true},
+    marks: [
+        Plot.rectY(stop_times_oi.map(label_schedules), Plot.binX({y: "proportion-facet"}, {
+            x: "s_until_next_arrival",
+            fill: "source",
+            fx: "source",
+            interval: 5 * 60, // we format from seconds to minutes, so do the equivalent here
+            domain: [0, 45 * 60],
+            tip: {
+                pointer: "x",
+                format: {
+                    fx: false,
+                    fill: false,
+                }
+            }
+        })),
+        Plot.axisFx({label: "Schedule"})
+    ]
+})
+```
+
+```js
+// manually define what `map_control` expects
+// const map_control_stub = {
+//     ward: ward_oi,
+//     roads: (ward_oi.id == 'city') ? 4 : 5
+// }
+
+// const stop_times_plot = Plot.plot({
+//   width: width,
+//   title: `Transit stops for ${route_id_oi_pretty}`,
+//   projection: {
+//     type: "mercator",
+//     domain: rewind(city_limits),
+//     inset: 10
+//   },
+//   color: {
+//     legend: true,
+//     scheme: "Observable10"
+//     },
+//   marks: [
+//     ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control: map_control_stub }),
+//     Plot.dot(stop_times_oi.map(label_schedules), Plot.group(
+//         {r: "count"},
+//         {
+//             x: "stop_lon_normalized",
+//             y: "stop_lat_normalized",
+//             color: "source",
+//             fill: "source",
+//             title: d => `#${d.stop_code}: ${stops_oi.find(s => s.stop_code === d.stop_code).stop_name_normalized}`,
+//             tip: true,
+//             fx: "source",
+//             opacity: 0.7
+//         }
+//     ))
+//   ]
+// })
+```
+
+```js
+// stop_times_plot
 ```
 
 <!-- ## Data / loading -->
