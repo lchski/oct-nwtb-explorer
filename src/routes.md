@@ -88,33 +88,47 @@ view(Inputs.table(routes.map(label_schedules).map(label_route_ids), {
 </div>
 
 ```js
-Plot.plot({
-    title: `How do arrival frequencies for the #${route_id_oi_pretty} differ across service windows?`,
-    subtitle: "Counts how many times buses or trains arrive on this route during the selected service windows, previous schedule vs. NWTB",
-    width: Math.max(width, 550),
-    x: {axis: null, label: "Schedule"},
-    fx: {label: "Schedule"},
-    y: {label: "Arrival frequency", tickFormat: "s", grid: true},
-    color: {legend: true},
-    marks: [
-        Plot.barY(stop_times_oi.map(label_service_windows).map(label_schedules), Plot.group(
-            {y: "count"},
-            {
-                y: "service_window",
-                x: "source",
-                fx: "service_window",
-                fill: "source",
-                tip: {
-                    pointer: "x",
-                    format: {
-                        fx: false,
-                        fill: false,
-                    }
-                }
-            }
-        ))
-    ]
+// manually define what `map_control` expects
+const map_control_stub = {
+    ward: {
+        id: 'city'
+    },
+    roads: 4
+}
+
+const stop_times_plot = Plot.plot({
+  width: width,
+  title: `How often does the #${route_id_oi_pretty} stop across its route?`,
+  projection: {
+    type: "mercator",
+    domain: stops_to_geojson(stops_oi),
+    inset: 25
+  },
+  color: {
+    legend: true,
+    scheme: "Observable10"
+    },
+  marks: [
+    ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control: map_control_stub }),
+    Plot.dot(stop_times_oi.map(label_schedules), Plot.group(
+        {r: "count"},
+        {
+            x: "stop_lon_normalized",
+            y: "stop_lat_normalized",
+            color: "source",
+            fill: "source",
+            title: d => `Stop #${d.stop_code}: ${stops_oi.find(s => s.stop_code === d.stop_code).stop_name_normalized}`,
+            tip: true,
+            fx: "source",
+            opacity: 0.7
+        }
+    ))
+  ]
 })
+```
+
+```js
+stop_times_plot
 ```
 
 ```js
@@ -145,45 +159,33 @@ Plot.plot({
 ```
 
 ```js
-// manually define what `map_control` expects
-// const map_control_stub = {
-//     ward: ward_oi,
-//     roads: (ward_oi.id == 'city') ? 4 : 5
-// }
-
-// const stop_times_plot = Plot.plot({
-//   width: width,
-//   title: `Transit stops for ${route_id_oi_pretty}`,
-//   projection: {
-//     type: "mercator",
-//     domain: rewind(city_limits),
-//     inset: 10
-//   },
-//   color: {
-//     legend: true,
-//     scheme: "Observable10"
-//     },
-//   marks: [
-//     ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control: map_control_stub }),
-//     Plot.dot(stop_times_oi.map(label_schedules), Plot.group(
-//         {r: "count"},
-//         {
-//             x: "stop_lon_normalized",
-//             y: "stop_lat_normalized",
-//             color: "source",
-//             fill: "source",
-//             title: d => `#${d.stop_code}: ${stops_oi.find(s => s.stop_code === d.stop_code).stop_name_normalized}`,
-//             tip: true,
-//             fx: "source",
-//             opacity: 0.7
-//         }
-//     ))
-//   ]
-// })
-```
-
-```js
-// stop_times_plot
+Plot.plot({
+    title: `How do arrival frequencies for the #${route_id_oi_pretty} differ across service windows?`,
+    subtitle: "Counts how many times buses or trains arrive on this route during the selected service windows, previous schedule vs. NWTB",
+    width: Math.max(width, 550),
+    x: {axis: null, label: "Schedule"},
+    fx: {label: "Schedule"},
+    y: {label: "Arrival frequency", tickFormat: "s", grid: true},
+    color: {legend: true},
+    marks: [
+        Plot.barY(stop_times_oi.map(label_service_windows).map(label_schedules), Plot.group(
+            {y: "count"},
+            {
+                y: "service_window",
+                x: "source",
+                fx: "service_window",
+                fill: "source",
+                tip: {
+                    pointer: "x",
+                    format: {
+                        fx: false,
+                        fill: false,
+                    }
+                }
+            }
+        ))
+    ]
+})
 ```
 
 <!-- ## Data / loading -->
@@ -216,3 +218,48 @@ WHERE
   route_id = '${route_id_oi}'
 `)]
 ```
+
+```js
+const stops_oi = [...await octdb.query(`
+SELECT 
+    stop_code,
+    stop_name_normalized,
+    stop_lat_normalized,
+    stop_lon_normalized
+FROM stops
+WHERE
+    list_contains(${array_to_sql_qry_array([...new Set(stop_times_oi.map(st => st.stop_code))])}, stop_code)
+`)]
+```
+
+```js
+stops_oi
+```
+
+```js
+const stops_to_geojson = (stops_to_convert) => {
+  const stops_geojson = {
+    type: "FeatureCollection",
+    features: []
+  }
+  
+  stops_to_convert.forEach(stop => {
+    const feature = {
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [stop.stop_lon_normalized, stop.stop_lat_normalized]
+      },
+      properties: {
+        stop_code: stop.stop_code
+      }
+    }
+
+    stops_geojson.features.push(feature)
+  })
+  
+  return stops_geojson;
+}
+```
+
+
