@@ -5,7 +5,7 @@ toc: false
 ---
 
 ```js
-import {to_pct, ch_incr_decr} from './lib/helpers.js'
+import {to_pct, ch_incr_decr, label_schedules} from './lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
 import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from './lib/maps.js'
 ```
@@ -35,8 +35,8 @@ ${service_period_desc}
 </div>
 
 For the selected options:
-- the current schedule services ${stops_summary.current.n.toLocaleString()} stops
-- the new schedule will service ${stops_summary.new.n.toLocaleString()} (${ch_incr_decr(stops_summary.new.change, true)}${Math.abs(stops_summary.new.change).toLocaleString()})
+- the previous schedule serviced ${stops_summary.current.n.toLocaleString()} stops
+- the new schedule services ${stops_summary.new.n.toLocaleString()} (${ch_incr_decr(stops_summary.new.change, true)}${Math.abs(stops_summary.new.change).toLocaleString()})
 
 ```js
 let stops_summary = {
@@ -160,9 +160,9 @@ const viewer_plot = Plot.plot({
         channels: {
           Name: d => d.stop_name_normalized,
           "Stop code": d => d.stop_code,
-          "Stop frequency (current)": d => d.n_stops_current,
+          "Stop frequency (previous)": d => d.n_stops_current,
           "Stop frequency (new)": d => d.n_stops_new,
-          "Difference (new vs current)": d => d.n_stops_difference,
+          "Difference (new vs previous)": d => d.n_stops_difference,
           "% change": d => d.is_new_stop ? "n/a (new stop)" : Math.round(d.pct_stops_difference * 1000) / 10,
           // "Change rank": d => d.ranking
         },
@@ -214,7 +214,7 @@ viewer_plot
 const stop_times_plot = Plot.plot({
   width: Math.max(width, 550),
   title: "Transit stops in Ottawa",
-  subtitle: "Hexagon size indicates how many times buses stop in a given area with the new schedule, based on all the stops in the area. Blurred colour indicates (roughly) the degree of change for that area, comparing the old schedule to the new one. Bluer means increased service, redder means reduced. (Blurred colour does odd things where there’s very low / no service, like some rural and industrial areas—sorry!)",
+  subtitle: "Hexagon size indicates how many times buses stop in a given area with the new schedule, based on all the stops in the area. Blurred colour indicates (roughly) the degree of change for that area, comparing the previous schedule to the new one. Bluer means increased service, redder means reduced. (Blurred colour does odd things where there’s very low / no service, like some rural and industrial areas—sorry!)",
   projection: {
     type: "mercator",
     domain: get_map_domain({ map_control, manual_map_control, city_limits }),

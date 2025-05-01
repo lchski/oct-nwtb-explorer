@@ -4,7 +4,7 @@ theme: [light, wide]
 ---
 
 ```js
-import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards} from './lib/helpers.js'
+import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules} from './lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
 import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from './lib/maps.js'
 import {rewind} from "jsr:@nshiab/journalism/web"
@@ -76,7 +76,7 @@ const ward_oi = view(Inputs.select([
 <div>
 
 During the service period you’ve selected above, ${ward_oi.name} has:
-- ${stops_oi.length.toLocaleString()} total stops (combining the existing and new schedule)
+- ${stops_oi.length.toLocaleString()} total stops (combining the previous and new schedule)
 - ${stop_times_oi_per_stop.filter(s => s.source === 'new').length.toLocaleString()} (${to_pct(stop_times_oi_per_stop.filter(s => s.source === 'new').length / stops_oi.length)}%) of these stops active in the new schedule
 
 Buses or trains arrive at these stops ${stop_times_oi_summary.new.n.toLocaleString()} times in the new schedule.
@@ -92,12 +92,12 @@ Buses or trains arrive at these stops ${stop_times_oi_summary.new.n.toLocaleStri
 ```js
 Plot.plot({
     title: `How long do you have to wait for your next train / bus in ${ward_oi.name}?`,
-    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than 45 minutes), current schedule vs. NWTB`,
+    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than 45 minutes), previous schedule vs. NWTB`,
     width,
     x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
     y: {label: "Percentage (%)", percent: true, grid: true},
     marks: [
-        Plot.rectY(stop_times_oi, Plot.binX({y: "proportion-facet"}, {
+        Plot.rectY(stop_times_oi.map(label_schedules), Plot.binX({y: "proportion-facet"}, {
             x: "s_until_next_arrival",
             fill: "source",
             fx: "source",
@@ -138,7 +138,7 @@ const wait_time_summary = {
 
 Here are key measures for wait times in ${ward_oi.name} (in minutes):
 
-Measure   | Current     | New
+Measure   | Previous     | New
 ---------- | ------------ | ----------
 Range   | ${wait_time_summary.current.min} to ${wait_time_summary.current.max} | ${wait_time_summary.new.min} to ${wait_time_summary.new.max}
 Mean   | ${wait_time_summary.current.mean} | ${wait_time_summary.new.mean} (${summ_diff(wait_time_summary.current.mean, wait_time_summary.new.mean)})
@@ -157,12 +157,12 @@ const stop_times_oi_per_stop_above_cutoff = stop_times_oi_per_stop.filter(s => s
 ```js
 Plot.plot({
     title: `How often do buses or trains arrive at stops in ${ward_oi.name}?`,
-    subtitle: `Histogram of how many times buses or trains arrive at each stop, current schedule vs. NWTB (cut off at ${stop_times_oi_cutoff}, see below)`,
+    subtitle: `Histogram of how many times buses or trains arrive at each stop, previous schedule vs. NWTB (cut off at ${stop_times_oi_cutoff}, see below)`,
     width,
     x: {label: "Arrival frequency"},
     y: {label: "Number of stops", tickFormat: "s", grid: true},
     marks: [
-        Plot.rectY(stop_times_oi_per_stop, Plot.binX({y: "count"}, {
+        Plot.rectY(stop_times_oi_per_stop.map(label_schedules), Plot.binX({y: "count"}, {
             x: "n_stop_times",
             fill: "source",
             fx: "source",
@@ -182,11 +182,11 @@ Plot.plot({
 })
 ```
 
-_The histogram cuts off ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'current').length} stop(s) in the current schedule and ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'new').length} stop(s) in the new schedule where buses or trains arrive more than ${stop_times_oi_cutoff} times during the selected timeframe._
+_The histogram cuts off ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'current').length} stop(s) in the previous schedule and ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'new').length} stop(s) in the new schedule where buses or trains arrive more than ${stop_times_oi_cutoff} times during the selected timeframe._
 
 Here are key measures for arrival frequency at stops in ${ward_oi.name}:
 
-Measure   | Current     | New
+Measure   | Previous     | New
 ---------- | ------------ | ----------
 Range   | ${stop_times_oi_per_stop_summary_current.min} to ${stop_times_oi_per_stop_summary_current.max} | ${stop_times_oi_per_stop_summary_new.min} to ${stop_times_oi_per_stop_summary_new.max}
 Mean   | ${stop_times_oi_per_stop_summary_current.mean} | ${stop_times_oi_per_stop_summary_new.mean} (${summ_diff(stop_times_oi_per_stop_summary_current.mean, stop_times_oi_per_stop_summary_new.mean)})
@@ -197,14 +197,14 @@ _A mean value of ${stop_times_oi_per_stop_summary_new.mean} indicates that the a
 ```js
 Plot.plot({
     title: `How do arrival frequencies in ${ward_oi.name} differ across service windows?`,
-    subtitle: "Counts how many times buses arrive at stops during the selected service windows, current schedule vs. NWTB",
+    subtitle: "Counts how many times buses arrive at stops during the selected service windows, previous schedule vs. NWTB",
     width: Math.max(width, 550),
     x: {axis: null, label: "Schedule"},
     fx: {label: "Schedule"},
     y: {label: "Arrival frequency", tickFormat: "s", grid: true},
     color: {legend: true},
     marks: [
-        Plot.barY(stop_times_oi.map(label_service_windows), Plot.group(
+        Plot.barY(stop_times_oi.map(label_service_windows).map(label_schedules), Plot.group(
             {y: "count"},
             {
                 y: "service_window",
@@ -245,7 +245,7 @@ const stop_times_plot = (ward_oi.id === 'city') ? '' : Plot.plot({
     },
   marks: [
     ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control: map_control_stub }),
-    Plot.dot(stop_times_oi, Plot.group(
+    Plot.dot(stop_times_oi.map(label_schedules), Plot.group(
         {r: "count"},
         {
             x: "stop_lon_normalized",
@@ -283,7 +283,7 @@ This section isn’t affected by the ward you choose. Instead, it compares servi
 ```js
 const stops_by_ward_plot = Plot.plot({
     title: `How many stops are there by ward?`,
-    subtitle: "Counts how many stops are active during selected service windows, current schedule vs. NWTB",
+    subtitle: "Counts how many stops are active during selected service windows, previous schedule vs. NWTB",
     marginLeft: 250,
     marginBottom: 40,
     y: {axis: null, label: "Schedule"},
@@ -294,7 +294,7 @@ const stops_by_ward_plot = Plot.plot({
         fontSize: '1em',
     },
     marks: [
-        Plot.barX(stops_by_ward.map(label_wards), Plot.group(
+        Plot.barX(stops_by_ward.map(label_wards).map(label_schedules), Plot.group(
             {x: "count"},
             {
                 x: "ward",
@@ -317,7 +317,7 @@ const stops_by_ward_plot = Plot.plot({
 ```js
 const arrivals_by_ward_plot = Plot.plot({
     title: `How many arrivals, by ward?`,
-    subtitle: "Counts how many times buses or trains arrive during selected service windows, current schedule vs. NWTB",
+    subtitle: "Counts how many times buses or trains arrive during selected service windows, previous schedule vs. NWTB",
     marginLeft: 250,
     marginBottom: 40,
     y: {axis: null, label: "Schedule"},
@@ -328,7 +328,7 @@ const arrivals_by_ward_plot = Plot.plot({
         fontSize: '1em',
     },
     marks: [
-        Plot.barX(arrivals_by_ward.map(label_wards), Plot.group(
+        Plot.barX(arrivals_by_ward.map(label_wards).map(label_schedules), Plot.group(
             {x: "count"},
             {
                 x: "ward",

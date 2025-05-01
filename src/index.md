@@ -18,8 +18,8 @@ You can explore the new network from a few angles:
 
 ## To keep in mind
 
-- “Weekday”, “Saturday”, and “Sunday” schedules are based on the following, respectively:
-    - Current: April 11, 12, and 13, 2025
+- “Weekday”, “Saturday”, and “Sunday” service numbers are based on the following, respectively:
+    - 2019–2025 (previous): April 11, 12, and 13, 2025
     - NWTB: May 9, 10, and 11, 2025
     - (Note: we manually added in the [shopper routes](https://www.octranspo.com/en/our-services/bus-o-train-network/service-types/shopper-routes/), even though they wouldn’t all run on April 11 or May 9, so rural service is more accurately represented.)
-- The “previous” schedule refers to pre-April 27, 2025, while “new” refers to the NWTB schedule.
+- The “previous” schedule refers to the schedule pre-April 27, 2025 (since the [2019 “#ReallyBigServiceChange”](https://www.cbc.ca/news/canada/ottawa/bus-changes-lrt-ottawa-october-six-1.5304675)), while “new” refers to the NWTB schedule.
