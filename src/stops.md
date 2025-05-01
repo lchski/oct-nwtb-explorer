@@ -60,6 +60,8 @@ const stop_table = Inputs.table(stop_search, {
 })
 ```
 
+## Choose stop(s)
+
 ```js
 const stop_codes_oi_raw = view(Inputs.text({
     label: "Stop code(s) of interest (put a space between to enter multiple)",

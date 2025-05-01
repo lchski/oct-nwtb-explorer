@@ -28,6 +28,7 @@ export default {
       name: "Explore by…",
       pages: [
         {name: "Wards (including city-wide)", path: "/wards"},
+        {name: "Routes", path: "/routes"},
         {name: "Stops", path: "/stops"},
         {name: "Maps", path: "/maps"},
       ]
