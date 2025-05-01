@@ -5,7 +5,7 @@ toc: false
 ---
 
 ```js
-import {to_pct, ch_incr_decr, label_service_windows} from './lib/helpers.js'
+import {to_pct, ch_incr_decr, label_service_windows, label_schedules} from './lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
 import {wards} from './lib/maps.js'
 
@@ -90,19 +90,19 @@ const stops_oi = stops.filter(s => stop_codes_oi.includes(s.stop_code))
 <div class="tip">The following numbers are affected by the schedule options you make above (e.g., weekday, Saturday, Sunday)—change those to see how your service changes!</div>
 </div>
 
-Buses or trains currently stop ${stop_times_oi_summary.current.n.toLocaleString()} times at your ${stops_oi.length.toLocaleString()} selected stop(s). Under the new schedule, they’ll stop ${stop_times_oi_summary.new.n.toLocaleString()} times (${ch_incr_decr(stop_times_oi_summary.new.n_change, true)}${Math.abs(stop_times_oi_summary.new.n_change)}, a ${stop_times_oi_summary.new.pct_change}% change).
+Buses or trains previously stopped ${stop_times_oi_summary.current.n.toLocaleString()} times at your ${stops_oi.length.toLocaleString()} selected stop(s). Under the new schedule, they stop ${stop_times_oi_summary.new.n.toLocaleString()} times (${ch_incr_decr(stop_times_oi_summary.new.n_change, true)}${Math.abs(stop_times_oi_summary.new.n_change)}, a ${stop_times_oi_summary.new.pct_change}% change).
 
 ```js
 Plot.plot({
     title: `How do arrival frequencies at your selected stop(s) differ across service windows?`,
-    subtitle: "Counts how many times buses or trains arrive at the stop(s) during the selected service windows, current schedule vs. NWTB",
+    subtitle: "Counts how many times buses or trains arrive at the stop(s) during the selected service windows, previous schedule vs. NWTB",
     width: Math.max(width, 550),
     x: {axis: null, label: "Schedule"},
     fx: {label: "Schedule"},
     y: {label: "Arrival frequency", tickFormat: "s", grid: true},
     color: {legend: true},
     marks: [
-        Plot.barY(stop_times_oi.map(label_service_windows), Plot.group(
+        Plot.barY(stop_times_oi.map(label_service_windows).map(label_schedules), Plot.group(
             {y: "count"},
             {
                 y: "service_window",
@@ -125,12 +125,12 @@ Plot.plot({
 ```js
 Plot.plot({
     title: `How long do you have to wait for your next train / bus at your selected stops?`,
-    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than 45 minutes), current schedule vs. NWTB`,
+    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than 45 minutes), previous schedule vs. NWTB`,
     width,
     x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
     y: {label: "Percentage (%)", percent: true, grid: true},
     marks: [
-        Plot.rectY(stop_times_oi, Plot.binX({y: "proportion-facet"}, {
+        Plot.rectY(stop_times_oi.map(label_schedules), Plot.binX({y: "proportion-facet"}, {
             x: "s_until_next_arrival",
             fill: "source",
             fx: "source",
@@ -203,7 +203,7 @@ const routes_at_stops_output = stops_oi.map(stop_oi => {
             <h3>${stop_oi.stop_code} – ${stop_oi.stop_name_normalized}</h3>
             <div class="grid grid-cols-2">
                 <div class="card">
-                    <h4>Current</h4>
+                    <h4>Previous</h4>
                     <table>
                         <thead>
                             <tr>

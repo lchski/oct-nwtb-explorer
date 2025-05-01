@@ -134,3 +134,17 @@ export const label_wards = (row) => {
 	return newRow;
 };
 
+export const label_schedules = (row) => {
+	const newRow = { ...row };
+	
+	switch (newRow.source) {
+		case 'current':
+		newRow.source = '2019–2025 (previous)';
+		break;
+		case 'new':
+		newRow.source = 'new';
+		break;
+	}
+	
+	return newRow;
+};
