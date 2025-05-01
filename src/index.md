@@ -18,7 +18,8 @@ You can explore the new network from a few angles:
 
 ## To keep in mind
 
-- “Weekday”, “Saturday”, and “Sunday” schedules are based on the following:
+- “Weekday”, “Saturday”, and “Sunday” schedules are based on the following, respectively:
     - Current: April 11, 12, and 13, 2025
     - NWTB: May 9, 10, and 11, 2025
+    - (Note: we manually added in the [shopper routes](https://www.octranspo.com/en/our-services/bus-o-train-network/service-types/shopper-routes/), even though they wouldn’t all run on April 11 or May 9, so rural service is more accurately represented.)
 - This was prepared just before the routing change went into effect, so the site uses the language of “current” and “new”. I’ll fix that shortly, but for now, keep in mind—“current” refers to pre-April 27, 2025, while “new” refers to the NWTB schedule.
