@@ -15,7 +15,7 @@ You can explore the new network from a few angles:
 - [by ward](/wards) (including a city-wide summary)
 - [by routes](/routes)
 - [by stops](/stops)
-- [by maps](/maps) _(this one might break on phones or other less powerful devices—there’s a lot of math going on!)_
+- [by maps](/maps) _(this one might break on phones or other less powerful devices—there’s a lot of math going on! the wards and routes pages have simpler maps)_
 
 ## Key terms
 
