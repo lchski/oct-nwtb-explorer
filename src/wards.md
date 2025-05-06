@@ -384,15 +384,9 @@ WHERE
 ```
 
 ```js
-const stops_oi = [...await octdb.query(`
-SELECT 
-    stop_code,
-    stop_name_normalized,
-    ward_number::INTEGER AS ward_number
-FROM stops
-WHERE
-    ${(ward_oi.id !== 'city') ? `ward_number = '${ward_oi.number}'` : 'TRUE'}
-`)]
+const stops_raw = await FileAttachment('./data/octranspo.com/stops_normalized.parquet').parquet()
+const stops = stops_raw.toArray()
+const stops_oi = (ward_oi.id !== 'city') ? stops.filter(d => d.ward_number == ward_oi.number) : stops
 ```
 
 ```js
