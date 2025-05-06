@@ -41,20 +41,14 @@ const stop_search = Generators.input(stop_search_input);
 const stop_table = Inputs.table(stop_search, {
     columns: [
         "stop_code",
-        "stop_name_normalized",
-        "ward_number"
+        "stop_name_normalized"
     ],
     header: {
         stop_code: "Code",
-        stop_name_normalized: "Stop name",
-        ward_number: "Ward"
-    },
-    format: {
-        ward_number: x => `${x} – ${ward_details.find(w => w.number == x).name}`
+        stop_name_normalized: "Stop name"
     },
     width: {
-        stop_code: 50,
-        ward_number: 100
+        stop_code: 50
     },
     select: false
 })
@@ -267,13 +261,8 @@ import {octdb, array_to_sql_qry_array} from './lib/octdb.js'
 ```
 
 ```js
-const stops = [...await octdb.query(`
-SELECT 
-    stop_code,
-    stop_name_normalized,
-    ward_number::INTEGER AS ward_number
-FROM stops
-`)]
+const stops_raw = await FileAttachment('./data/octranspo.com/stops_normalized.parquet').parquet()
+const stops = stops_raw.toArray()
 ```
 
 ```js
