@@ -5,7 +5,7 @@ toc: false
 ---
 
 ```js
-import {to_pct, ch_incr_decr, label_service_windows, label_schedules} from './lib/helpers.js'
+import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids} from './lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
 import {wards} from './lib/maps.js'
 
@@ -159,16 +159,10 @@ This plot shows _all_ the wait times at your stop(s). If multiple routes serve t
 
 ```js
 const route_at_stop_output = (routes_at_this_stop, route_direction_ids) => {
-    const route_details = routes_at_this_stop.filter(d => route_direction_ids.includes(d.route_direction_id))
-
     return html.fragment`
         ${route_direction_ids.map(this_route_direction_id => {
-            const route_details = routes_at_this_stop.filter(d => d.route_direction_id === this_route_direction_id)
+            const route_details = routes_at_this_stop.filter(d => d.route_direction_id === this_route_direction_id).map(label_route_ids)
             const s_avg_wait = route_waittimes_at_stops.find(d => d.route_direction_id === this_route_direction_id && d.source === route_details[0].source && d.stop_code === route_details[0].stop_code).s_avg_wait
-
-            
-
-            console.log("rd", route_details)
 
             return html.fragment`
                 <tr>
