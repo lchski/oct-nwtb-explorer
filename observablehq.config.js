@@ -42,13 +42,17 @@ export default {
       ]
     }
   ],
-  // async *dynamicPaths() {
-  //   const route_ids = await octdb.runAndReadAll(`SELECT DISTINCT route_id FROM routes`)
+  async *dynamicPaths() {
+    const route_ids = await octdb.runAndReadAll(`SELECT DISTINCT route_id FROM routes`)
 
-  //   for await (const {route_id} of route_ids.getRowObjects()) {
-  //     yield `/routes/${route_id}`;
-  //   }
-  // },
+    for await (const {route_id} of route_ids.getRowObjects()) {
+      yield `/routes/${route_id}`;
+    }
+
+    for (const ward_index of Array(23)) {
+      yield `/wards/${ward_index + 1}`
+    }
+  },
 
   // Content to add to the head of the page, e.g. for a favicon:
   // head: '<link rel="icon" href="observable.png" type="image/png" sizes="32x32">',
