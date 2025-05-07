@@ -1,4 +1,30 @@
-Ward #${observable.params.ward_id}
+---
+theme: [light, wide]
+---
+
+```js
+import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules} from '../lib/helpers.js'
+import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
+import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from '../lib/maps.js'
+import {rewind} from "jsr:@nshiab/journalism/web"
+
+const level_of_detail = Generators.input(level_of_detail_input)
+```
+
+# Ward: ${ward_details.name} (#${ward_details.number})
+
+## Focus on the impacts of NWTB in ${ward_details.name}
+
+## Choose service period
+
+${service_period_desc}
+
+<div class="grid grid-cols-2" style="grid-auto-rows: auto;">
+	<div class="card">
+		<h3>OC Transpo service period</h3>
+		${level_of_detail_input}
+	</div>
+</div>
 
 ```js
 Plot.plot({
