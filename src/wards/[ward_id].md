@@ -26,6 +26,12 @@ ${service_period_desc}
 	</div>
 </div>
 
+During the service period you’ve selected above, ${ward_details.name} has:
+- ${stops_oi.length.toLocaleString()} total stops (combining the previous and new schedule)
+- ${stop_times_oi_per_stop.filter(s => s.source === 'new').length.toLocaleString()} (${to_pct(stop_times_oi_per_stop.filter(s => s.source === 'new').length / stops_oi.length)}%) of these stops active in the new schedule
+
+Buses or trains arrive at these stops ${stop_times_oi_summary.new.n.toLocaleString()} times in the new schedule.
+
 ```js
 Plot.plot({
     title: `How long do you have to wait for your next train / bus in ${ward_details.name}?`,
@@ -68,4 +74,13 @@ const stop_times = stop_times_raw.toArray().filter(d => selected_service_windows
 
 ```js
 stop_times
+```
+
+```js
+const stop_times_per_stop_raw = await FileAttachment(`./${observable.params.ward_id}/stop_times_per_stop.csv`).csv()
+const stop_times_per_stop = stop_times_per_stop_raw.filter(d => selected_service_windows(level_of_detail).includes(d.service_window) && selected_service_ids(level_of_detail).includes(d.service_id))
+```
+
+```js
+stop_times_per_stop
 ```

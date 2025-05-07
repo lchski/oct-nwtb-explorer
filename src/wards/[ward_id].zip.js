@@ -31,18 +31,19 @@ const octdb = await duckdb_instance.connect()
 
 await octdb.run(`CREATE TABLE stop_times AS SELECT * FROM read_parquet('./src/data/octranspo.com/stop_times.parquet') WHERE ward_number = ${ward_id}`)
 
-const stop_times_raw = await octdb.runAndReadAll(`
+const stop_times_per_stop_raw = await octdb.runAndReadAll(`
 	SELECT
 		source,
 		service_id,
 		service_window,
-		COUNT(*) as arrival_frequency
+		stop_code,
+		COUNT(*) as n_stop_times
 	FROM stop_times
-	GROUP BY ROLLUP (source, service_id, service_window)
+	GROUP BY ROLLUP (source, service_id, service_window, stop_code)
 `)
-const stop_times = await stop_times_raw.getRowObjects()
+const stop_times_per_stop = await stop_times_per_stop_raw.getRowObjects()
 
 const zip = new JSZip()
 zip.file("details.json", JSON.stringify(ward_details))
-zip.file("stop_times.csv", csvFormat(stop_times))
+zip.file("stop_times_per_stop.csv", csvFormat(stop_times_per_stop))
 zip.generateNodeStream().pipe(process.stdout)
