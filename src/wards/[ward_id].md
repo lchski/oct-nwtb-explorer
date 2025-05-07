@@ -62,7 +62,8 @@ ward_details
 ```
 
 ```js
-const stop_times = FileAttachment(`./${observable.params.ward_id}/stop_times.csv`).csv()
+const stop_times_raw = await FileAttachment(`../data/generated/wards/${observable.params.ward_id}.parquet`).parquet()
+const stop_times = stop_times_raw.toArray().filter(d => selected_service_windows(level_of_detail).includes(d.service_window) && selected_service_ids(level_of_detail).includes(d.service_id))
 ```
 
 ```js
