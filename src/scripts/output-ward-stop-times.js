@@ -9,7 +9,7 @@ for (const ward_number of Array.from({ length: 24 }, (_, i) => i + 1)) {
 	await octdb.run(`
 		COPY (
 			SELECT
-				* EXCLUDE (stop_lat_normalized, stop_lon_normalized)
+				*
 			FROM stop_times
 			WHERE ward_number = ${ward_number}
 		) TO './src/data/generated/wards/${ward_number}.parquet' (COMPRESSION gzip)

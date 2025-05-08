@@ -60,11 +60,105 @@ Plot.plot({
 ```
 
 ```js
+Plot.plot({
+    title: `How do arrival frequencies in ${ward_details.name} differ across service windows?`,
+    subtitle: "Counts how many times buses arrive at stops during the selected service windows, previous schedule vs. NWTB",
+    width: Math.max(width, 550),
+    x: {axis: null, label: "Schedule"},
+    fx: {label: "Schedule"},
+    y: {label: "Arrival frequency", tickFormat: "s", grid: true},
+    color: {legend: true},
+    marks: [
+        Plot.barY(stop_times.map(label_service_windows).map(label_schedules), Plot.group(
+            {y: "count"},
+            {
+                y: "service_window",
+                x: "source",
+                fx: "service_window",
+                fill: "source",
+                tip: {
+                    pointer: "x",
+                    format: {
+                        fx: false,
+                        fill: false,
+                    }
+                }
+            }
+        ))
+    ]
+})
+```
+
+```js
+// manually define what `map_control` expects
+const map_control_stub = {
+    ward: ward_oi,
+    roads: (ward_oi.id == 'city') ? 4 : 5
+}
+
+const stop_times_plot = Plot.plot({
+  width: width,
+  title: `Transit stops in ${ward_details.name}`,
+  projection: {
+    type: "mercator",
+    domain: rewind(ward_oi.geometry),
+    inset: 10
+  },
+  color: {
+    legend: true,
+    scheme: "Observable10"
+    },
+  marks: [
+    ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control: map_control_stub }),
+    Plot.dot(stop_times.map(label_schedules), Plot.group(
+        {r: "count"},
+        {
+            x: "stop_lon_normalized",
+            y: "stop_lat_normalized",
+            color: "source",
+            fill: "source",
+            title: d => `#${d.stop_code}: ${stops.find(s => s.stop_code === d.stop_code).stop_name_normalized}`,
+            tip: true,
+            fx: "source",
+            opacity: 0.7
+        }
+    ))
+  ]
+})
+```
+
+```js
+stop_times_plot
+```
+
+<!-- Loading -->
+
+```js
 const ward_details = FileAttachment(`./${observable.params.ward_id}/details.json`).json()
 ```
 
 ```js
-ward_details
+const get_ward_oi = () => {
+    const ward_info = wards.features
+        .find(ward => ward.properties.WARD == ward_details.number)
+
+    return {
+        id: ward_info.id,
+        name: ward_info.properties.NAME,
+        number: Number(ward_info.properties.WARD),
+        geometry: ward_info.geometry
+    }
+}
+const ward_oi = get_ward_oi()
+```
+
+```js
+const stops_raw = await FileAttachment(`../data/octranspo.com/stops_normalized.parquet`).parquet()
+const stops = stops_raw.toArray()
+```
+
+```js
+stops
 ```
 
 ```js
