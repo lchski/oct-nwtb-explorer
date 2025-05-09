@@ -43,7 +43,7 @@ const stops_by_ward_plot = Plot.plot({
     marginBottom: 40,
     y: {axis: null, label: "Schedule"},
     fy: {label: "Ward"},
-    x: {label: "Number of stops", tickFormat: "s", grid: true},
+    x: {label: "Number of stops", grid: true},
     color: {legend: true},
     style: {
         fontSize: '1em',
@@ -130,11 +130,13 @@ import {octdb, array_to_sql_qry_array} from './lib/octdb.js'
 ```js
 const stops_by_ward = [...await octdb.query(`
 SELECT
-    *
+    source, ward_number, stop_code, SUM(n_stop_times) AS n_stop_times
 FROM stop_times_by_stop
 WHERE 
     list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
     list_contains(${array_to_sql_qry_array(selected_service_ids(level_of_detail))}, service_id)
+GROUP BY
+    source, ward_number, stop_code
 `)]
 ```
 
