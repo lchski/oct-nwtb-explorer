@@ -18,6 +18,10 @@ const service_ids = selected_service_ids(level_of_detail)
 
 # Ward: ${ward_details.name} (#${ward_details.number})
 
+```js
+document.title = `Ward: ${ward_details.name} (#${ward_details.number}) | NWTB Explorer`;
+```
+
 ## Focus on the impacts of NWTB in ${ward_details.name}
 
 ## Choose service period
@@ -34,8 +38,8 @@ ${service_period_desc}
 ## Focus on the ward
 
 During the service period you’ve selected above, ${ward_details.name} has:
-- ${stops.length.toLocaleString()} total stops (combining the previous and new schedule)
-- ${stop_times_per_stop.filter(s => s.source === 'new').length.toLocaleString()} (${to_pct(stop_times_per_stop.filter(s => s.source === 'new').length / stops.length)}%) of these stops active in the new schedule
+- ${stop_times_per_stop.filter(s => s.source === 'current').length.toLocaleString()} stops active in the previous schedule
+- ${stop_times_per_stop.filter(s => s.source === 'new').length.toLocaleString()} stops active in the new schedule
 
 Buses or trains arrive at these stops ${stop_times_oi_summary.new.n.toLocaleString()} times in the new schedule.
 
@@ -268,16 +272,6 @@ const stop_times_per_stop = aq.from(
     .rollup({ n_stop_times: d => aq.op.sum(d.n_stop_times) })
     .orderby('stop_code', 'source')
     .objects()
-```
-
-```js
-const stop_times_per_stop_filtered = stop_times_per_stop.filter(d => {
-    return service_windows.includes(d.service_window) && service_ids.includes(d.service_id)
-})
-```
-
-```js
-// stop_times_per_stop_filtered
 ```
 
 ```js
