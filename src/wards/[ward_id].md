@@ -257,9 +257,10 @@ const stop_times = stop_times_raw.toArray().filter(d => selected_service_windows
 ```
 
 ```js
-const stop_times_per_stop_raw = await FileAttachment(`./${observable.params.ward_id}/stop_times_per_stop.csv`).csv()
+const stop_times_per_stop_raw = await FileAttachment(`../data/generated/wards/stop_times_per_stop/${observable.params.ward_id}.parquet`).parquet()
 const stop_times_per_stop = aq.from(
         stop_times_per_stop_raw
+            .toArray()
             .filter(d => selected_service_windows(level_of_detail).includes(d.service_window) && selected_service_ids(level_of_detail).includes(d.service_id))
             .filter(d => d.stop_code != '')
     )

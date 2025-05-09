@@ -1,8 +1,7 @@
 import { parseArgs } from "node:util"
 import { csvFormat } from "d3-dsv"
 import JSZip from "jszip"
-import { DuckDBInstance } from '@duckdb/node-api'
-import * as fs from 'fs';
+import * as fs from 'fs'
 
 
 const {
@@ -24,26 +23,6 @@ const ward_details = wards.features
 	}))
 	[0]
 
-// Stop times
-// TODO: use group by rollup
-const duckdb_instance = await DuckDBInstance.create()
-const octdb = await duckdb_instance.connect()
-
-await octdb.run(`CREATE TABLE stop_times AS SELECT * FROM read_parquet('./src/data/octranspo.com/stop_times.parquet') WHERE ward_number = ${ward_id}`)
-
-const stop_times_per_stop_raw = await octdb.runAndReadAll(`
-	SELECT
-		source,
-		service_id,
-		service_window,
-		stop_code,
-		COUNT(*) as n_stop_times
-	FROM stop_times
-	GROUP BY ROLLUP (source, service_id, service_window, stop_code)
-`)
-const stop_times_per_stop = await stop_times_per_stop_raw.getRowObjects()
-
 const zip = new JSZip()
 zip.file("details.json", JSON.stringify(ward_details))
-zip.file("stop_times_per_stop.csv", csvFormat(stop_times_per_stop))
 zip.generateNodeStream().pipe(process.stdout)
