@@ -6,15 +6,13 @@ theme: [light, wide]
 ```js
 import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules} from './lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
-import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from './lib/maps.js'
-import {rewind} from "jsr:@nshiab/journalism/web"
 
 const level_of_detail = Generators.input(level_of_detail_input)
 ```
 
 # Wards
 
-Explore the NWTB data by focusing on a ward at a time. See charts, summary statistics, maps comparing the old schedule to the new one. Instead of focusing on one ward, you can choose to see the same analysis city-wide.
+Learn about how the schedule changes affect different wards. Compare wards, or focus on one at a time.
 
 ## Choose service period
 
@@ -106,7 +104,7 @@ const arrivals_by_ward_plot = Plot.plot({
 
 ## Focus on a ward
 
-Choose a ward to focus on:
+Explore the NWTB data by focusing on a ward at a time. See charts, summary statistics, maps comparing the old schedule to the new one. Choose a ward to focus on:
 
 <ol class="grid grid-cols-2">
 ${
@@ -155,11 +153,5 @@ WHERE
 <!-- ### Other -->
 
 ```js
-const ward_details = wards.features
-  .map(ward => ({
-    id: ward.id,
-    name: ward.properties.NAME,
-    number: Number(ward.properties.WARD)
-  }))
-  .sort((wardA, wardB) => wardB.number < wardA.number)
+const ward_details = FileAttachment('data/generated/wards/ward_details.json').json()
 ```

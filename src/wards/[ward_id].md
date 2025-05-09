@@ -16,13 +16,13 @@ const service_windows = selected_service_windows(level_of_detail)
 const service_ids = selected_service_ids(level_of_detail)
 ```
 
-# Ward: ${ward_details.name} (#${ward_details.number})
+# Ward: ${ward_oi.name} (#${ward_oi.number})
 
 ```js
-document.title = `Ward: ${ward_details.name} (#${ward_details.number}) | NWTB Explorer`;
+document.title = `Ward: ${ward_oi.name} (#${ward_oi.number}) | NWTB Explorer`;
 ```
 
-## Focus on the impacts of NWTB in ${ward_details.name}
+Learn more about the impacts of NWTB in ${ward_oi.name}. Or, [return to the wards page to pick another ward](/wards).
 
 ## Choose service period
 
@@ -37,7 +37,7 @@ ${service_period_desc}
 
 ## Focus on the ward
 
-During the service period you’ve selected above, ${ward_details.name} has:
+During the service period you’ve selected above, ${ward_oi.name} has:
 - ${stop_times_per_stop.filter(s => s.source === 'current').length.toLocaleString()} stops active in the previous schedule
 - ${stop_times_per_stop.filter(s => s.source === 'new').length.toLocaleString()} stops active in the new schedule
 
@@ -45,7 +45,7 @@ Buses or trains arrive at these stops ${stop_times_oi_summary.new.n.toLocaleStri
 
 ```js
 Plot.plot({
-    title: `How long do you have to wait for your next train / bus in ${ward_details.name}?`,
+    title: `How long do you have to wait for your next train / bus in ${ward_oi.name}?`,
     subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than 45 minutes), previous schedule vs. NWTB`,
     width,
     x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
@@ -151,7 +151,7 @@ _A mean value of ${stop_times_oi_per_stop_summary_new.mean} indicates that the a
 
 ```js
 Plot.plot({
-    title: `How do arrival frequencies in ${ward_details.name} differ across service windows?`,
+    title: `How do arrival frequencies in ${ward_oi.name} differ across service windows?`,
     subtitle: "Counts how many times buses arrive at stops during the selected service windows, previous schedule vs. NWTB",
     width: Math.max(width, 550),
     x: {axis: null, label: "Schedule"},
@@ -188,7 +188,7 @@ const map_control_stub = {
 
 const stop_times_plot = Plot.plot({
   width: width,
-  title: `Transit stops in ${ward_details.name}`,
+  title: `Transit stops in ${ward_oi.name}`,
   projection: {
     type: "mercator",
     domain: rewind(ward_oi.geometry),
@@ -221,16 +221,32 @@ const stop_times_plot = Plot.plot({
 stop_times_plot
 ```
 
+
+## Focus on another ward
+
+Choose a different ward to focus on:
+
+<ol class="grid grid-cols-2">
+${
+    ward_details.map(ward => {
+        if (ward.number === ward_oi.number) {
+            return html`
+                <li>${ward.name}</li>
+            `
+        } else {
+            return html`
+                <li><a href="/wards/${ward.number}">${ward.name}</a></li>
+            `
+        }
+    })
+}
+</ol>
+
 <!-- Loading -->
-
-```js
-const ward_details = FileAttachment(`./${observable.params.ward_id}/details.json`).json()
-```
-
 ```js
 const get_ward_oi = () => {
     const ward_info = wards.features
-        .find(ward => ward.properties.WARD == ward_details.number)
+        .find(ward => ward.properties.WARD == observable.params.ward_id)
 
     return {
         id: ward_info.id,
@@ -244,7 +260,7 @@ const ward_oi = get_ward_oi()
 
 ```js
 const stops_raw = await FileAttachment(`../data/octranspo.com/stops_normalized.parquet`).parquet()
-const stops = stops_raw.toArray().filter(stop => stop.ward_number == ward_details.number)
+const stops = stops_raw.toArray().filter(stop => stop.ward_number == ward_oi.number)
 ```
 
 ```js
@@ -311,4 +327,8 @@ const stop_times_oi_per_stop_summary = aq.from(stop_times_per_stop)
 
 const stop_times_oi_per_stop_summary_current = stop_times_oi_per_stop_summary.find(d => d.source === 'current')
 const stop_times_oi_per_stop_summary_new = stop_times_oi_per_stop_summary.find(d => d.source === 'new')
+```
+
+```js
+const ward_details = FileAttachment('../data/generated/wards/ward_details.json').json()
 ```
