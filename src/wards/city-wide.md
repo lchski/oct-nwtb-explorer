@@ -20,6 +20,8 @@ const service_ids = selected_service_ids(level_of_detail)
 
 Learn more about the impacts of NWTB at the city level. Or, [return to the wards page to pick another ward](/wards).
 
+_There’s a lot of data for this page, so it may load a bit slower._
+
 ## Choose service period
 
 ${service_period_desc}
