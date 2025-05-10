@@ -102,7 +102,7 @@ const arrivals_by_ward_plot = Plot.plot({
 ```
 
 
-## Focus on a ward
+## Focus on a ward, or city-wide
 
 Explore the NWTB data by focusing on a ward at a time. See charts, summary statistics, maps comparing the old schedule to the new one. Choose a ward to focus on:
 
@@ -113,6 +113,8 @@ ${
     `)
 }
 </ol>
+
+Or, [see the same charts at the city-wide level](/wards/city-wide).
 
 
 

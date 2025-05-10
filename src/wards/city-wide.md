@@ -5,7 +5,7 @@ theme: [light, wide]
 ```js
 import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
-import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from '../lib/maps.js'
+// import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from '../lib/maps.js'
 import {rewind} from "jsr:@nshiab/journalism/web"
 
 const level_of_detail = Generators.input(level_of_detail_input)
@@ -16,13 +16,9 @@ const service_windows = selected_service_windows(level_of_detail)
 const service_ids = selected_service_ids(level_of_detail)
 ```
 
-# Ward: ${ward_oi.name} (#${ward_oi.number})
+# Ward: City-wide
 
-```js
-document.title = `Ward: ${ward_oi.name} (#${ward_oi.number}) | NWTB Explorer`;
-```
-
-Learn more about the impacts of NWTB in ${ward_oi.name}. Or, [return to the wards page to pick another ward](/wards).
+Learn more about the impacts of NWTB at the city level. Or, [return to the wards page to pick another ward](/wards).
 
 ## Choose service period
 
@@ -179,47 +175,6 @@ Plot.plot({
 })
 ```
 
-```js
-// manually define what `map_control` expects
-const map_control_stub = {
-    ward: ward_oi,
-    roads: 5
-}
-
-const stop_times_plot = Plot.plot({
-  width: width,
-  title: `Transit stops in ${ward_oi.name}`,
-  projection: {
-    type: "mercator",
-    domain: rewind(ward_oi.geometry),
-    inset: 10
-  },
-  color: {
-    legend: true,
-    scheme: "Observable10"
-    },
-  marks: [
-    ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control: map_control_stub }),
-    Plot.dot(stop_times.map(label_schedules), Plot.group(
-        {r: "count"},
-        {
-            x: "stop_lon_normalized",
-            y: "stop_lat_normalized",
-            color: "source",
-            fill: "source",
-            title: d => `#${d.stop_code}: ${stops.find(s => s.stop_code === d.stop_code).stop_name_normalized}`,
-            tip: true,
-            fx: "source",
-            opacity: 0.7
-        }
-    ))
-  ]
-})
-```
-
-```js
-stop_times_plot
-```
 
 
 ## Focus on another ward, or city-wide
@@ -245,46 +200,44 @@ ${
 Or, [see the same charts at the city-wide level](/wards/city-wide).
 
 <!-- Loading -->
-```js
-const get_ward_oi = () => {
-    const ward_info = wards.features
-        .find(ward => ward.properties.WARD == observable.params.ward_id)
 
-    return {
-        id: ward_info.id,
-        name: ward_info.properties.NAME,
-        number: Number(ward_info.properties.WARD),
-        geometry: ward_info.geometry
-    }
+```js
+const ward_oi = {
+    id: "city",
+    name: "Ottawa",
+    number: "all wards"
 }
-const ward_oi = get_ward_oi()
+```
+
+<!-- ### Database -->
+
+```js
+import {octdb, array_to_sql_qry_array} from '../lib/octdb.js'
 ```
 
 ```js
-const stops_raw = await FileAttachment(`../data/octranspo.com/stops_normalized.parquet`).parquet()
-const stops = stops_raw.toArray().filter(stop => stop.ward_number == ward_oi.number)
-```
+const stop_times = [...await octdb.query(`
+SELECT *
+FROM stop_times
+WHERE
+  list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
+  list_contains(${array_to_sql_qry_array(selected_service_ids(level_of_detail))}, service_id)
+`)]
 
-```js
-const stop_times_raw = await FileAttachment(`../data/generated/wards/stop_times/${observable.params.ward_id}.parquet`).parquet()
-const stop_times = stop_times_raw.toArray().filter(d => selected_service_windows(level_of_detail).includes(d.service_window) && selected_service_ids(level_of_detail).includes(d.service_id))
-```
+const stop_times_per_stop = [...await octdb.query(`
+SELECT
+    source,
+    stop_code,
+    COUNT(*) as n_stop_times
+FROM stop_times
+WHERE
+  list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
+  list_contains(${array_to_sql_qry_array(selected_service_ids(level_of_detail))}, service_id)
+GROUP BY
+    source,
+    stop_code
+`)]
 
-```js
-const stop_times_per_stop_raw = await FileAttachment(`../data/generated/wards/stop_times_per_stop/${observable.params.ward_id}.parquet`).parquet()
-const stop_times_per_stop = aq.from(
-        stop_times_per_stop_raw
-            .toArray()
-            .filter(d => selected_service_windows(level_of_detail).includes(d.service_window) && selected_service_ids(level_of_detail).includes(d.service_id))
-            .filter(d => d.stop_code !== null)
-    )
-    .groupby('source', 'stop_code')
-    .rollup({ n_stop_times: d => aq.op.sum(d.n_stop_times) })
-    .orderby('stop_code', 'source')
-    .objects()
-```
-
-```js
 const stop_times_oi_current = stop_times.filter(st => st.source === "current")
 const stop_times_oi_new = stop_times.filter(st => st.source === "new")
 
