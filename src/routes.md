@@ -224,15 +224,8 @@ import {octdb, array_to_sql_qry_array} from './lib/octdb.js'
 ```
 
 ```js
-const routes = [...await octdb.query(`
-SELECT
-    source,
-    route_id,
-    STRING_AGG(most_common_headsign, ' // ') AS most_common_headsign,
-    SUM(total_trips)::INTEGER AS total_trips
-FROM routes
-GROUP BY source, route_id
-`)]
+const routes_raw = await FileAttachment(`./data/generated/routes/routes.parquet`).parquet()
+const routes = routes_raw.toArray()
 ```
 
 ```js
