@@ -320,5 +320,5 @@ const ward_details = wards.features
     number: Number(ward.properties.WARD),
     geometry: ward.geometry
   }))
-  .sort((wardA, wardB) => wardB.number < wardA.number)
+  .sort((wardA, wardB) => wardA.number - wardB.number)
 ```

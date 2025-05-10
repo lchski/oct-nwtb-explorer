@@ -9,7 +9,7 @@ const ward_details = wards.features
 		name: ward.properties.NAME,
 		number: Number(ward.properties.WARD)
 	}))
-	.sort((wardA, wardB) => wardB.number < wardA.number)
+	.sort((wardA, wardB) => wardA.number - wardB.number)
 
 // Write the remapped data to the output file
-fs.writeFileSync('src/data/generated/wards/ward_details.json', JSON.stringify(ward_details, null, 2))
+fs.writeFileSync('src/data/generated/wards/ward_details.json', JSON.stringify(ward_details))
