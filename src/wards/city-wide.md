@@ -5,8 +5,6 @@ theme: [light, wide]
 ```js
 import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
-// import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from '../lib/maps.js'
-import {rewind} from "jsr:@nshiab/journalism/web"
 
 const level_of_detail = Generators.input(level_of_detail_input)
 ```
