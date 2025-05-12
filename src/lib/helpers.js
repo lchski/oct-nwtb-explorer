@@ -1,3 +1,6 @@
+import * as aq from "npm:arquero";
+import markdownit from "npm:markdown-it"
+
 // NB: does one decimal
 export const to_pct = (frac) => Number.isNaN(frac) ? 0 : Math.round(frac * 1000) / 10
 
@@ -169,4 +172,55 @@ export const label_route_ids = (row) => {
 	
 	return newRow;
 };
+
+// via: https://github.com/observablehq/framework/issues/895
+const Markdown = new markdownit({html: true});
+
+export function md(strings) {
+    let string = strings[0];
+    for (let i = 1; i < arguments.length; ++i) {
+        string += String(arguments[i]);
+        string += strings[i];
+    }
+    const template = document.createElement("template");
+    template.innerHTML = Markdown.render(string);
+    return template.content.cloneNode(true);
+}
+
+export const generateStatsTable = (data, metricField, outputTransformer = (d) => d, sources = ['current', 'new']) => {
+    aq.addFunction('transformOutput', outputTransformer, { override: true })
+
+    const stats = aq.from(data)
+        .params({ metricField })
+        .groupby('source')
+        .rollup({
+            min: (d, $) => aq.op.transformOutput(aq.op.min(d[$.metricField])),
+            max: (d, $) => aq.op.transformOutput(aq.op.max(d[$.metricField])),
+            mean: (d, $) => aq.op.transformOutput(aq.op.mean(d[$.metricField])),
+            median: (d, $) => aq.op.transformOutput(aq.op.median(d[$.metricField]))
+        })
+        .derive({
+            range: d => `${d.min} to ${d.max}`
+        })
+        .objects()
+
+    const p = stats.find(d => d.source === 'current')
+    const n = stats.find(d => d.source === 'new')
+
+    const results = aq.table({
+        Measure: ['Range', 'Mean', 'Median'],
+        Previous: [p.range, p.mean, p.median],
+        New: [n.range, n.mean, n.median]
+    })
+
+    return md`${results.toMarkdown()}`
+}
+
+export const formatSecondsForStatsTable = (d) => {
+    if (typeof d === 'string') {
+        return d
+    }
+
+    return Math.round(d / 60)
+}
 

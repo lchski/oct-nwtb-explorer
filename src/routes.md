@@ -4,11 +4,10 @@ toc: false
 ---
 
 ```js
-import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids} from './lib/helpers.js'
+import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, md, generateStatsTable, formatSecondsForStatsTable} from './lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
 import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from './lib/maps.js'
 import {rewind} from "jsr:@nshiab/journalism/web"
-import markdownit from "npm:markdown-it"
 
 const level_of_detail = Generators.input(level_of_detail_input)
 ```
@@ -187,56 +186,7 @@ Plot.plot({
 ```
 
 ```js
-// via: https://github.com/observablehq/framework/issues/895
-const Markdown = new markdownit({html: true});
 
-function md(strings) {
-    let string = strings[0];
-    for (let i = 1; i < arguments.length; ++i) {
-        string += String(arguments[i]);
-        string += strings[i];
-    }
-    const template = document.createElement("template");
-    template.innerHTML = Markdown.render(string);
-    return template.content.cloneNode(true);
-}
-
-const generateStatsTable = (data, metricField, outputTransformer = (d) => d, sources = ['current', 'new']) => {
-    aq.addFunction('transformOutput', outputTransformer, { override: true })
-
-    const stats = aq.from(data)
-        .params({ metricField })
-        .groupby('source')
-        .rollup({
-            min: (d, $) => aq.op.transformOutput(aq.op.min(d[$.metricField])),
-            max: (d, $) => aq.op.transformOutput(aq.op.max(d[$.metricField])),
-            mean: (d, $) => aq.op.transformOutput(aq.op.mean(d[$.metricField])),
-            median: (d, $) => aq.op.transformOutput(aq.op.median(d[$.metricField]))
-        })
-        .derive({
-            range: d => `${d.min} to ${d.max}`
-        })
-        .objects()
-
-    const p = stats.find(d => d.source === 'current')
-    const n = stats.find(d => d.source === 'new')
-
-    const results = aq.table({
-        Measure: ['Range', 'Mean', 'Median'],
-        Previous: [p.range, p.mean, p.median],
-        New: [n.range, n.mean, n.median]
-    })
-
-    return md`${results.toMarkdown()}`
-}
-
-const formatSecondsForStatsTable = (d) => {
-    if (typeof d === 'string') {
-        return d
-    }
-
-    return Math.round(d / 60)
-}
 ```
 
 ${generateStatsTable(stop_times_oi, 's_until_next_arrival', formatSecondsForStatsTable)}
