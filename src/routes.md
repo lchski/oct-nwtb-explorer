@@ -4,7 +4,7 @@ toc: false
 ---
 
 ```js
-import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, md, generateStatsTable, formatSecondsForStatsTable} from './lib/helpers.js'
+import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, generateStatsTable, formatSecondsForStatsTable} from './lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
 import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from './lib/maps.js'
 import {rewind} from "jsr:@nshiab/journalism/web"
@@ -183,10 +183,6 @@ Plot.plot({
         Plot.axisFx({label: "Schedule"})
     ]
 })
-```
-
-```js
-
 ```
 
 ${generateStatsTable(stop_times_oi, 's_until_next_arrival', formatSecondsForStatsTable)}

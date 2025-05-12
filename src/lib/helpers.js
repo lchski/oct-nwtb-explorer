@@ -210,10 +210,15 @@ export const generateStatsTable = (data, metricField, outputTransformer = (d) =>
     const results = aq.table({
         Measure: ['Range', 'Mean', 'Median'],
         Previous: [p.range, p.mean, p.median],
-        New: [n.range, n.mean, n.median]
+        New: [n.range, `${n.mean} (${summ_diff(p.mean, n.mean)})`, `${n.median} (${summ_diff(p.median, n.median)})`]
     })
 
-    return md`${results.toMarkdown()}`
+    return md`${results.toMarkdown({
+		align: {
+			Previous: 'l',
+			New: 'l'
+		}
+	})}`
 }
 
 export const formatSecondsForStatsTable = (d) => {
