@@ -185,6 +185,8 @@ Plot.plot({
 })
 ```
 
+Here are key measures for wait times for the #${route_id_oi_pretty}:
+
 ${generateStatsTable(stop_times_oi, 's_until_next_arrival', formatSecondsForStatsTable)}
 
 
