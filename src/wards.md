@@ -47,10 +47,9 @@ const stops_by_ward_plot = Plot.plot({
         fontSize: '1em',
     },
     marks: [
-        Plot.barX(stops_by_ward.map(label_wards).map(label_schedules), Plot.group(
-            {x: "count"},
+        Plot.rectX(stop_times,
             {
-                x: "ward",
+                x: "n_stops",
                 y: "source",
                 fy: "ward",
                 fill: "source",
@@ -62,7 +61,7 @@ const stops_by_ward_plot = Plot.plot({
                     }
                 }
             }
-        ))
+        )
     ]
 })
 ```
@@ -81,10 +80,9 @@ const arrivals_by_ward_plot = Plot.plot({
         fontSize: '1em',
     },
     marks: [
-        Plot.barX(arrivals_by_ward.map(label_wards).map(label_schedules), Plot.group(
-            {x: "count"},
+        Plot.rectX(stop_times,
             {
-                x: "ward",
+                x: "n_stop_times",
                 y: "source",
                 fy: "ward",
                 fill: "source",
@@ -96,7 +94,7 @@ const arrivals_by_ward_plot = Plot.plot({
                     }
                 }
             }
-        ))
+        )
     ]
 })
 ```
@@ -121,35 +119,22 @@ Or, [see the same charts at the city-wide level](/wards/city-wide).
 
 <!-- ## Data / loading -->
 
-<!-- ### Database -->
-
 ```js
-import {octdb, array_to_sql_qry_array} from './lib/octdb.js'
-```
-
-```js
-const stops_by_ward = [...await octdb.query(`
-SELECT
-    source, ward_number, stop_code, SUM(n_stop_times) AS n_stop_times
-FROM stop_times_by_stop
-WHERE 
-    list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
-    list_contains(${array_to_sql_qry_array(selected_service_ids(level_of_detail))}, service_id)
-GROUP BY
-    source, ward_number, stop_code
-`)]
-```
-
-```js
-const arrivals_by_ward = [...await octdb.query(`
-SELECT
-    ward_number,
-    source
-FROM stop_times
-WHERE 
-    list_contains(${array_to_sql_qry_array(selected_service_windows(level_of_detail))}, service_window) AND
-    list_contains(${array_to_sql_qry_array(selected_service_ids(level_of_detail))}, service_id)
-`)]
+const stop_times_raw = await FileAttachment(`./data/generated/wards/all.parquet`).parquet()
+const stop_times = aq.from(
+        stop_times_raw
+            .toArray()
+            .filter(d => selected_service_windows(level_of_detail).includes(d.service_window) && selected_service_ids(level_of_detail).includes(d.service_id))
+            .filter(d => d.stop_code !== null)
+    )
+    .groupby('source', 'ward_number')
+    .rollup({
+        n_stops: d => aq.op.distinct(d.stop_code),
+        n_stop_times: d => aq.op.sum(d.n_stop_times)
+    })
+    .objects()
+    .map(label_wards)
+    .map(label_schedules)
 ```
 
 <!-- ### Other -->
