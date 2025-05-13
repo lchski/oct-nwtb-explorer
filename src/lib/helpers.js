@@ -165,10 +165,21 @@ export const label_route_ids = (row) => {
 		case '4-354':
 			newRow.route_id = 4;
 			break;
+		case 'E1':
+			newRow.route_id = 'E1';
+			break;
 		default:
 			newRow.route_id = Number(newRow.route_id);
 			break;
 	}
+	
+	return newRow;
+};
+
+export const label_route_url = (row) => {
+	const newRow = { ...row };
+	
+	newRow.route_url = `/routes/${newRow.route_id}`
 	
 	return newRow;
 };
