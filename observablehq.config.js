@@ -43,11 +43,11 @@ export default {
     }
   ],
   async *dynamicPaths() {
-    // const route_ids = await octdb.runAndReadAll(`SELECT DISTINCT route_id FROM routes`)
+    const route_ids = await octdb.runAndReadAll(`SELECT DISTINCT route_id FROM routes`)
 
-    // for await (const {route_id} of route_ids.getRowObjects()) {
-    //   yield `/routes/${route_id}`;
-    // }
+    for await (const {route_id} of route_ids.getRowObjects()) {
+      yield `/routes/${route_id}`;
+    }
 
     for (const ward_number of Array.from({ length: 24 }, (_, i) => i + 1)) {
       yield `/wards/${ward_number}`
