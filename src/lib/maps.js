@@ -65,3 +65,27 @@ export const get_map_domain = ({ map_control, manual_map_control, city_limits })
 	
 	return rewind(map_control.ward.geometry)
 }
+
+export const stops_to_geojson = (stops_to_convert) => {
+	const stops_geojson = {
+		type: "FeatureCollection",
+		features: []
+	}
+	
+	stops_to_convert.forEach(stop => {
+		const feature = {
+			type: "Feature",
+			geometry: {
+				type: "Point",
+				coordinates: [stop.stop_lon_normalized, stop.stop_lat_normalized]
+			},
+			properties: {
+				stop_code: stop.stop_code
+			}
+		}
+		
+		stops_geojson.features.push(feature)
+	})
+	
+	return stops_geojson;
+}
