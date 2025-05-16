@@ -198,7 +198,7 @@ export function md(strings) {
     return template.content.cloneNode(true);
 }
 
-export const generateStatsTable = (data, metricField, outputTransformer = (d) => d, sources = ['current', 'new']) => {
+export const generateStatsTable = (data, metricField, outputTransformer = (d) => d) => {
     aq.addFunction('transformOutput', outputTransformer, { override: true })
 
     const stats = aq.from(data)
@@ -218,11 +218,26 @@ export const generateStatsTable = (data, metricField, outputTransformer = (d) =>
     const p = stats.find(d => d.source === 'current')
     const n = stats.find(d => d.source === 'new')
 
-    const results = aq.table({
-        Measure: ['Range', 'Mean', 'Median'],
-        Previous: [p.range, p.mean, p.median],
-        New: [n.range, `${n.mean} (${summ_diff(p.mean, n.mean)})`, `${n.median} (${summ_diff(p.median, n.median)})`]
-    })
+	let results_p = ['-', '-', '-']
+	let results_n = ['-', '-', '-']
+
+	if (p !== undefined) {
+		results_p = [p.range, p.mean, p.median]
+	}
+
+	if (n !== undefined) {
+		if (p !== undefined) {
+			results_n = [n.range, `${n.mean} (${summ_diff(p.mean, n.mean)})`, `${n.median} (${summ_diff(p.median, n.median)})`]
+		} else {
+			results_n = [n.range, n.mean, n.median]
+		}
+	}
+	
+	const results = aq.table({
+		Measure: ['Range', 'Mean', 'Median'],
+		Previous: results_p,
+		New: results_n
+	})
 
     return md`${results.toMarkdown({
 		align: {
