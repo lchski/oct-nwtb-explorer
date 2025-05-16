@@ -58,8 +58,14 @@ view(Inputs.table(routes.map(label_schedules).map(label_route_ids), {
 const get_route_id_oi_sources = () => {
     const unique_sources = [...new Set(routes.filter(d => d.route_id === route_id_oi).map(st => st.source))]
 
+    console.log(unique_sources)
+
     if (unique_sources.length === 2) {
         return 'both'
+    }
+
+    if (unique_sources.length === 0) {
+        return 'neither'
     }
 
     return unique_sources[0]
@@ -70,6 +76,10 @@ const describe_route_id_oi_sources = () => {
 
     if (route_id_oi === "") {
         return html`Pick a route to see whether it was active in the previous schedule, current schedule, or both schedules.`
+    }
+
+    if (route_id_oi_sources === "neither") {
+        return html`There is <strong>no route ${route_id_oi_pretty} in either the previous or current schedule</strong>. Pick another route to see whether it was active in the previous schedule, current schedule, or both schedules.`
     }
 
     const route_link = html.fragment`To learn more, <strong><a href="/routes/${route_id_oi}">check out the ${route_id_oi_pretty}’s route page</a></strong>.`
