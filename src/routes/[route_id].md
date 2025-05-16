@@ -131,9 +131,11 @@ stop_times_plot
 ```
 
 ```js
-const wait_times_plot = (stop_times.filter(d => (d / 60) < 45).length > 0) ? Plot.plot({
+const wait_times_cutoff_min = 45
+
+const wait_times_plot = (stop_times.filter(d => d.s_until_next_arrival !== null && (d.s_until_next_arrival / 60) < wait_times_cutoff_min).length > 0) ? Plot.plot({
     title: `How long do you have to wait for the #${route_id_oi}?`,
-    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than 45 minutes), previous schedule vs. NWTB`,
+    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than ${wait_times_cutoff_min} minutes), previous schedule vs. NWTB`,
     width,
     x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
     y: {label: "Percentage (%)", percent: true, grid: true},
@@ -143,7 +145,7 @@ const wait_times_plot = (stop_times.filter(d => (d / 60) < 45).length > 0) ? Plo
             fill: "source",
             fx: "source",
             interval: 5 * 60, // we format from seconds to minutes, so do the equivalent here
-            domain: [0, 45 * 60],
+            domain: [0, wait_times_cutoff_min * 60],
             tip: {
                 pointer: "x",
                 format: {
@@ -154,7 +156,7 @@ const wait_times_plot = (stop_times.filter(d => (d / 60) < 45).length > 0) ? Plo
         })),
         Plot.axisFx({label: "Schedule"})
     ]
-}) : html`<figure><h2>How long do you have to wait for the #${route_id_oi}?</h2><em>All wait times are longer than 45 minutes. (Otherwise, there’d be a chart here.)</em></figure>`
+}) : html`<figure><h2>How long do you have to wait for the #${route_id_oi}?</h2><em>All wait times are longer than ${wait_times_cutoff_min} minutes. (Otherwise, there’d be a chart here.)</em></figure>`
 ```
 
 ```js
