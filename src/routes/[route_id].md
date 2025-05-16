@@ -64,6 +64,10 @@ const describe_route_id_oi_sources = () => {
 </div>
 
 ```js
+const flip_map_orientation = view(Inputs.toggle({label: "Flip map orientation (can help with wide / long routes)"}))
+```
+
+```js
 // manually define what `map_control` expects
 const map_control_stub = {
     ward: {
@@ -72,13 +76,32 @@ const map_control_stub = {
     roads: 4
 }
 
+const get_map_inset = (width) => {
+    if (width < 400)
+        return 5
+
+    if (width < 550)
+        return 10
+
+    return 25
+}
+
+const get_map_orientation = (orientation) => {
+    const map_breakpoint = 650
+
+    if (flip_map_orientation)
+        return (width < map_breakpoint) ? 'fx' : 'fy'
+
+    return (width < map_breakpoint) ? 'fy' : 'fx'
+}
+
 const stop_times_plot = Plot.plot({
   width: width,
   title: `How often does the #${route_id_oi} stop across its route?`,
   projection: {
     type: "mercator",
     domain: stops_to_geojson(stops),
-    inset: 25
+    inset: get_map_inset(width)
   },
   color: {
     legend: true,
@@ -95,7 +118,7 @@ const stop_times_plot = Plot.plot({
             fill: "source",
             title: d => `Stop #${d.stop_code}: ${stops.find(s => s.stop_code === d.stop_code).stop_name_normalized}`,
             tip: true,
-            fx: "source",
+            [get_map_orientation(flip_map_orientation)]: "source",
             opacity: 0.7
         }
     ))
