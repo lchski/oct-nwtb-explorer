@@ -131,7 +131,7 @@ stop_times_plot
 ```
 
 ```js
-Plot.plot({
+const wait_times_plot = (stop_times.filter(d => (d / 60) < 45).length > 0) ? Plot.plot({
     title: `How long do you have to wait for the #${route_id_oi}?`,
     subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than 45 minutes), previous schedule vs. NWTB`,
     width,
@@ -154,7 +154,11 @@ Plot.plot({
         })),
         Plot.axisFx({label: "Schedule"})
     ]
-})
+}) : html`<figure><h2>How long do you have to wait for the #${route_id_oi}?</h2><em>All wait times are longer than 45 minutes. (Otherwise, there’d be a chart here.)</em></figure>`
+```
+
+```js
+wait_times_plot
 ```
 
 Here are key measures for wait times for the #${route_id_oi}:
