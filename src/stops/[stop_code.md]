@@ -1,0 +1,52 @@
+---
+theme: [light, wide]
+---
+
+```js
+import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids} from './lib/helpers.js'
+import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
+
+const level_of_detail = Generators.input(level_of_detail_input)
+```
+
+
+# Stop: ${stop_code_oi}
+
+```js
+document.title = `Stop: ${stop_code_oi} | NWTB Explorer`;
+```
+
+Learn more about the impacts of NWTB for route ${stop_code_oi}. Or, [return to the routes page to pick another route](/routes).
+
+## Choose service period
+
+${service_period_desc}
+
+<div class="grid grid-cols-2" style="grid-auto-rows: auto;">
+	<div class="card">
+		<h3>OC Transpo service details</h3>
+		${level_of_detail_input}
+	</div>
+</div>
+
+
+## Details for route ${stop_code_oi}
+
+
+
+
+<!-- Loading -->
+
+```js
+const stop_times_raw = await FileAttachment(`../data/generated/stops/stop_times/${observable.params.stop_code}.parquet`).parquet()
+const stop_times = stop_times_raw.toArray().filter(d => selected_service_windows(level_of_detail).includes(d.service_window) && selected_service_ids(level_of_detail).includes(d.service_id))
+```
+
+```js
+const stops_raw = await FileAttachment(`../data/octranspo.com/stops_normalized.parquet`).parquet()
+const stops = stops_raw.toArray()
+```
+
+```js
+const stop_code_oi = observable.params.stop_code
+```

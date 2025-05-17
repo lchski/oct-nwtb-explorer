@@ -5,6 +5,7 @@ const duckdb_instance = await DuckDBInstance.create()
 const octdb = await duckdb_instance.connect()
 
 await octdb.run(`CREATE TABLE routes AS SELECT * FROM read_parquet('./src/data/octranspo.com/routes.parquet')`)
+await octdb.run(`CREATE TABLE stops AS SELECT * FROM read_parquet('./src/data/octranspo.com/stops_normalized.parquet')`)
 
 // See https://observablehq.com/framework/config for documentation.
 export default {
@@ -47,6 +48,12 @@ export default {
 
     for await (const {route_id} of route_ids.getRowObjects()) {
       yield `/routes/${route_id}`;
+    }
+
+    const stop_codes = await octdb.runAndReadAll(`SELECT DISTINCT stop_code FROM routes`)
+
+    for await (const {stop_code} of stop_codes.getRowObjects()) {
+      yield `/stops/${stop_code}`;
     }
 
     for (const ward_number of Array.from({ length: 24 }, (_, i) => i + 1)) {
