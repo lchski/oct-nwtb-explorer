@@ -3,7 +3,7 @@ theme: [light, wide]
 ---
 
 ```js
-import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules, generateStatsTable, formatSecondsForStatsTable} from '../lib/helpers.js'
+import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
 import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from '../lib/maps.js'
 import {rewind} from "jsr:@nshiab/journalism/web"
@@ -50,8 +50,9 @@ Plot.plot({
     width,
     x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
     y: {label: "Percentage (%)", percent: true, grid: true},
+    color: {domain: source_domain},
     marks: [
-        Plot.rectY(stop_times, Plot.binX({y: "proportion-facet"}, {
+        Plot.rectY(stop_times.map(label_schedules), Plot.binX({y: "proportion-facet"}, {
             x: "s_until_next_arrival",
             fill: "source",
             fx: "source",
@@ -94,6 +95,7 @@ Plot.plot({
     width,
     x: {label: "Arrival frequency"},
     y: {label: "Number of stops", tickFormat: "s", grid: true},
+    color: {domain: source_domain},
     marks: [
         Plot.rectY(stop_times_per_stop.map(label_schedules), Plot.binX({y: "count"}, {
             x: "n_stop_times",
@@ -135,7 +137,7 @@ Plot.plot({
     x: {axis: null, label: "Schedule"},
     fx: {label: "Schedule"},
     y: {label: "Arrival frequency", tickFormat: "s", grid: true},
-    color: {legend: true},
+    color: {legend: true, domain: source_domain},
     marks: [
         Plot.barY(stop_times.map(label_service_windows).map(label_schedules), Plot.group(
             {y: "count"},
@@ -174,7 +176,8 @@ const stop_times_plot = Plot.plot({
   },
   color: {
     legend: true,
-    scheme: "Observable10"
+    scheme: "Observable10",
+    domain: source_domain
     },
   marks: [
     ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control: map_control_stub }),

@@ -3,7 +3,7 @@ theme: [light, wide]
 ---
 
 ```js
-import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, generateStatsTable, formatSecondsForStatsTable} from '../lib/helpers.js'
+import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
 import {roads, ons_neighbourhoods, wards, plot_basemap_components, get_map_domain, stops_to_geojson} from '../lib/maps.js' // TODO: verify which, if any, of these is necessary
 import {rewind} from "jsr:@nshiab/journalism/web"
@@ -107,7 +107,8 @@ const stop_times_plot = Plot.plot({
   },
   color: {
     legend: true,
-    scheme: "Observable10"
+    scheme: "Observable10",
+    domain: source_domain
     },
   marks: [
     ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control: map_control_stub }),
@@ -141,6 +142,7 @@ const wait_times_plot = (stop_times.filter(d => d.s_until_next_arrival !== null 
     width,
     x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
     y: {label: "Percentage (%)", percent: true, grid: true},
+    color: {domain: source_domain},
     marks: [
         Plot.rectY(stop_times.map(label_schedules), Plot.binX({y: "proportion-facet"}, {
             x: "s_until_next_arrival",
@@ -178,7 +180,7 @@ Plot.plot({
     x: {axis: null, label: "Schedule"},
     fx: {label: "Schedule"},
     y: {label: "Arrival frequency", tickFormat: "s", grid: true},
-    color: {legend: true},
+    color: {legend: true, domain: source_domain},
     marks: [
         Plot.barY(stop_times.map(label_service_windows).map(label_schedules), Plot.group(
             {y: "count"},

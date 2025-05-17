@@ -3,7 +3,7 @@ theme: [light, wide]
 ---
 
 ```js
-import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, generateStatsTable, formatSecondsForStatsTable} from '../lib/helpers.js'
+import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
 
 const level_of_detail = Generators.input(level_of_detail_input)
@@ -42,7 +42,7 @@ Plot.plot({
     x: {axis: null, label: "Schedule"},
     fx: {label: "Schedule"},
     y: {label: "Arrival frequency", tickFormat: "s", grid: true},
-    color: {legend: true},
+    color: {legend: true, domain: source_domain},
     marks: [
         Plot.barY(stop_times.map(label_service_windows).map(label_schedules), Plot.group(
             {y: "count"},
@@ -73,6 +73,7 @@ const wait_times_plot = (stop_times.filter(d => d.s_until_next_arrival !== null 
     width,
     x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
     y: {label: "Percentage (%)", percent: true, grid: true},
+	color: {domain: source_domain},
     marks: [
         Plot.rectY(stop_times.map(label_schedules), Plot.binX({y: "proportion-facet"}, {
             x: "s_until_next_arrival",

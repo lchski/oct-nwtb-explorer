@@ -4,7 +4,7 @@ theme: [light, wide]
 ---
 
 ```js
-import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules} from './lib/helpers.js'
+import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules, source_domain} from './lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
 
 const level_of_detail = Generators.input(level_of_detail_input)
@@ -42,7 +42,7 @@ const stops_by_ward_plot = Plot.plot({
     y: {axis: null, label: "Schedule"},
     fy: {label: "Ward"},
     x: {label: "Number of stops", grid: true},
-    color: {legend: true},
+    color: {legend: true, domain: source_domain},
     style: {
         fontSize: '1em',
     },
@@ -75,7 +75,7 @@ const arrivals_by_ward_plot = Plot.plot({
     y: {axis: null, label: "Schedule"},
     fy: {label: "Ward"},
     x: {label: "Arrival frequency", tickFormat: "s", grid: true},
-    color: {legend: true},
+    color: {legend: true, domain: source_domain},
     style: {
         fontSize: '1em',
     },

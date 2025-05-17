@@ -3,7 +3,7 @@ theme: [light, wide]
 ---
 
 ```js
-import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules} from '../lib/helpers.js'
+import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules, source_domain} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
 
 const level_of_detail = Generators.input(level_of_detail_input)
@@ -46,8 +46,9 @@ Plot.plot({
     width,
     x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
     y: {label: "Percentage (%)", percent: true, grid: true},
+    color: {domain: source_domain},
     marks: [
-        Plot.rectY(stop_times, Plot.binX({y: "proportion-facet"}, {
+        Plot.rectY(stop_times.map(label_schedules), Plot.binX({y: "proportion-facet"}, {
             x: "s_until_next_arrival",
             fill: "source",
             fx: "source",
@@ -112,6 +113,7 @@ Plot.plot({
     width,
     x: {label: "Arrival frequency"},
     y: {label: "Number of stops", tickFormat: "s", grid: true},
+    color: {domain: source_domain},
     marks: [
         Plot.rectY(stop_times_per_stop.map(label_schedules), Plot.binX({y: "count"}, {
             x: "n_stop_times",
@@ -153,7 +155,7 @@ Plot.plot({
     x: {axis: null, label: "Schedule"},
     fx: {label: "Schedule"},
     y: {label: "Arrival frequency", tickFormat: "s", grid: true},
-    color: {legend: true},
+    color: {legend: true, domain: source_domain},
     marks: [
         Plot.barY(stop_times.map(label_service_windows).map(label_schedules), Plot.group(
             {y: "count"},

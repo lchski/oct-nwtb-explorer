@@ -263,3 +263,5 @@ export const formatSecondsForStatsTable = (d) => {
     return Math.round(d / 60)
 }
 
+export const source_domain = [{source: "current"}, {source: "new"}].map(label_schedules)
+	.map(d => d.source)
