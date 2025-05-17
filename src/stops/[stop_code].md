@@ -3,20 +3,20 @@ theme: [light, wide]
 ---
 
 ```js
-import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids} from './lib/helpers.js'
-import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
+import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids} from '../lib/helpers.js'
+import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
 
 const level_of_detail = Generators.input(level_of_detail_input)
 ```
 
 
-# Stop: ${stop_code_oi}
+# Stop: ${stop_name_pretty}
 
 ```js
-document.title = `Stop: ${stop_code_oi} | NWTB Explorer`;
+document.title = `Stop: ${stop_name_pretty} | NWTB Explorer`;
 ```
 
-Learn more about the impacts of NWTB for route ${stop_code_oi}. Or, [return to the routes page to pick another route](/routes).
+Learn more about the impacts of NWTB for ${stop_name_pretty}. Or, [return to the stops page to pick another stop](/stops).
 
 ## Choose service period
 
@@ -30,7 +30,7 @@ ${service_period_desc}
 </div>
 
 
-## Details for route ${stop_code_oi}
+## Details for stop ${stop_name_pretty}
 
 
 
@@ -49,4 +49,10 @@ const stops = stops_raw.toArray()
 
 ```js
 const stop_code_oi = observable.params.stop_code
+const stop_name_oi = stops.find(d => d.stop_code === stop_code_oi).stop_name_normalized
+const stop_name_pretty = `${stop_name_oi} (${stop_code_oi})`
+```
+
+```js
+stop_times
 ```
