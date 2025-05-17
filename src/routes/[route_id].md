@@ -87,12 +87,13 @@ const get_map_inset = (width) => {
 }
 
 const get_map_orientation = (orientation) => {
-    const map_breakpoint = 650
+    const domain_ratio = (d3.max(stops, d => d.stop_lon_normalized) - d3.min(stops, d => d.stop_lon_normalized)) / (d3.max(stops, d => d.stop_lat_normalized) - d3.min(stops, d => d.stop_lat_normalized)) // aspect ratio of rendered stops
+    const ratio_breakpoint = 1.5
 
-    if (flip_map_orientation)
-        return (width < map_breakpoint) ? 'fx' : 'fy'
+    if (orientation)
+        return (domain_ratio >= ratio_breakpoint) ? 'fx' : 'fy'
 
-    return (width < map_breakpoint) ? 'fy' : 'fx'
+    return (domain_ratio >= ratio_breakpoint) ? 'fy' : 'fx'
 }
 
 const stop_times_plot = Plot.plot({
