@@ -12,7 +12,7 @@ for await (const {stop_code} of stop_codes.getRowObjects()) {
 	await octdb.run(`
 		COPY (
 			SELECT
-				*
+				* EXCLUDE (stop_code, stop_lat_normalized, stop_lon_normalized, ward_number)
 			FROM stop_times
 			WHERE stop_code = '${stop_code}'
 		) TO './src/data/generated/stops/stop_times/${stop_code}.parquet' (COMPRESSION gzip)

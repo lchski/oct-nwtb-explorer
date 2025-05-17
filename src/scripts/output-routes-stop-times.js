@@ -8,7 +8,7 @@ await octdb.run(`CREATE TABLE stop_times AS SELECT * FROM read_parquet('./src/da
 
 const route_ids = await octdb.runAndReadAll(`SELECT DISTINCT route_id FROM routes`)
 
-for await (const {route_id} of route_ids.getRowObjects()) {
+for await (const {route_id} of route_ids.getRowObjects()) { // TODO: remove unused fields from this and other per-page exports
 	await octdb.run(`
 		COPY (
 			SELECT

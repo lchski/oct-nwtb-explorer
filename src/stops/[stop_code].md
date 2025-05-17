@@ -32,7 +32,38 @@ ${service_period_desc}
 
 ## Details for stop ${stop_name_pretty}
 
+```js
+Plot.plot({
+    title: `How do arrival frequencies at ${stop_name_pretty} differ across service windows?`,
+    subtitle: "Counts how many times buses or trains arrive at the stop during the selected service windows, previous schedule vs. NWTB",
+    width: Math.max(width, 550),
+    x: {axis: null, label: "Schedule"},
+    fx: {label: "Schedule"},
+    y: {label: "Arrival frequency", tickFormat: "s", grid: true},
+    color: {legend: true},
+    marks: [
+        Plot.barY(stop_times.map(label_service_windows).map(label_schedules), Plot.group(
+            {y: "count"},
+            {
+                y: "service_window",
+                x: "source",
+                fx: "service_window",
+                fill: "source",
+                tip: {
+                    pointer: "x",
+                    format: {
+                        fx: false,
+                        fill: false,
+                    }
+                }
+            }
+        ))
+    ]
+})
+```
 
+
+TODO... dropdown to select route at stop, to see more specific details, e.g., wait times across windows
 
 
 <!-- Loading -->
