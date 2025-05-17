@@ -52,10 +52,6 @@ ${stop_table}
 <!-- ### Database -->
 
 ```js
-import {octdb, array_to_sql_qry_array} from './lib/octdb.js'
-```
-
-```js
 const stops_raw = await FileAttachment('./data/octranspo.com/stops_normalized.parquet').parquet()
 const stops = stops_raw.toArray().map(label_stop_url)
 ```
