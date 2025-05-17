@@ -184,6 +184,14 @@ export const label_route_url = (row) => {
 	return newRow;
 };
 
+export const label_stop_url = (row) => {
+	const newRow = { ...row };
+	
+	newRow.stop_url = `/stops/${newRow.stop_code}`
+	
+	return newRow;
+};
+
 // via: https://github.com/observablehq/framework/issues/895
 const Markdown = new markdownit({html: true});
 
