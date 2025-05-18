@@ -150,6 +150,12 @@ At ${stop_name_pretty}, buses or trains from route ${route_id_oi} (direction: ${
 - now stop ${st_oi_n.length.toLocaleString()} times (${ch_incr_decr(st_oi_n.length - st_oi_p.length, true)}${Math.abs(st_oi_n.length - st_oi_p.length)}, a ${to_pct((st_oi_n.length - st_oi_p.length) / st_oi_p.length)}% change)
 
 ```js
+const route_oi_link = html.fragment`<a href="/routes/${route_oi.route_id}">explore route ${route_id_oi}</a>`
+```
+
+You can also ${route_oi_link} itself in more detail.
+
+```js
 Plot.plot({
     title: `How do arrival frequencies for ${route_oi.route_id} (${route_oi.direction}) at ${stop_name_pretty} differ across service windows?`,
     subtitle: "Counts how many times buses or trains arrive at the stop during the selected service windows, previous schedule vs. NWTB",
