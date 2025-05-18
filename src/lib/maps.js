@@ -1,19 +1,38 @@
 import {FileAttachment} from "observablehq:stdlib"
+import * as shapefile from "npm:shapefile"
 import * as Plot from "npm:@observablehq/plot";
 import * as d3 from "npm:d3";
 import {rewind} from "jsr:@nshiab/journalism/web"; // NB: rewind the four imports below if you want to use conic-conformal projection
 
 import {source_domain, label_schedules} from "./helpers.js"
 
-export const roads = FileAttachment("../data/ottawa.ca/Road_Centrelines_simplify_25.geojson").json()
+export const roads = shapefile.read(
+	...(await Promise.all([
+		FileAttachment("../data/ottawa.ca/Road_Centrelines_simplify_25.shp").stream(),
+		FileAttachment("../data/ottawa.ca/Road_Centrelines_simplify_25.dbf").stream()
+	]))
+)
 
-export const ons_neighbourhoods = FileAttachment("../data/ottawa.ca/ons_boundaries.geojson").json()
+export const ons_neighbourhoods = shapefile.read(
+	...(await Promise.all([
+		FileAttachment("../data/ottawa.ca/ons_boundaries.shp").stream()
+	]))
+)
 
-export const wards = FileAttachment("../data/ottawa.ca/wards_2022_to_2026.geojson").json()
+export const wards = shapefile.read(
+	...(await Promise.all([
+		FileAttachment("../data/ottawa.ca/wards_2022_to_2026.shp").stream(),
+		FileAttachment("../data/ottawa.ca/wards_2022_to_2026.dbf").stream()
+	]))
+)
 
 // Generated with mapshaper, merging 24 wards into one
 // ref: https://helpcenter.flourish.studio/hc/en-us/articles/8827921931919-How-to-merge-regions-with-Mapshaper
-export const city_limits = FileAttachment("../data/ottawa.ca/city-limits.geojson").json()
+export const city_limits = shapefile.read(
+	...(await Promise.all([
+		FileAttachment("../data/ottawa.ca/city-limits.shp").stream()
+	]))
+)
 
 
 
@@ -58,9 +77,9 @@ export const plot_basemap_components = ({
 
 export async function get_basemap_components() {
 	return {
-		roads: await FileAttachment("../data/ottawa.ca/Road_Centrelines_simplify_25.geojson").json(),
-		ons_neighbourhoods: await FileAttachment("../data/ottawa.ca/ons_boundaries.geojson").json(),
-		wards: await FileAttachment("../data/ottawa.ca/wards_2022_to_2026.geojson").json()
+		roads: await roads,
+		ons_neighbourhoods: await ons_neighbourhoods,
+		wards: await wards
 	}
 }
 
