@@ -83,13 +83,16 @@ export const map_stop_times = ({
 	width,
 	projection: {
 		type: "mercator",
-		domain: (domain === null) ? stops_to_geojson(stops) : domain,
+		domain: (domain === null) ? stops_to_geojson(stops) : rewind(domain),
 		inset: get_map_inset(width)
 	},
 	color: {
 		legend: true,
 		scheme: "Observable10",
 		domain: source_domain
+	},
+	[get_map_orientation(orientation_input, stops)]: { // fx or fy
+		label: "Schedule"
 	},
 	marks: [
 		...plot_basemap_components({ ...basemap_components, map_control: map_control_stub }),
@@ -102,7 +105,7 @@ export const map_stop_times = ({
 				fill: "source",
 				title: d => `#${d.stop_code}: ${stops.find(s => s.stop_code === d.stop_code).stop_name_normalized}`,
 				tip: true,
-				[get_map_orientation(orientation_input, stops)]: "source",
+				[get_map_orientation(orientation_input, stops)]: "source", // fx or fy
 				opacity: 0.7
 			}
 		))

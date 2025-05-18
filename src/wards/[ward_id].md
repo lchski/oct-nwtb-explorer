@@ -6,8 +6,7 @@ theme: [light, wide]
 import {label_schedules, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
 import {plot_wait_times, plot_arrival_frequencies, plot_st_per_stop_histogram} from '../lib/charts.js'
-import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from '../lib/maps.js'
-import {rewind} from "jsr:@nshiab/journalism/web"
+import {map_stop_times, get_basemap_components, wards} from '../lib/maps.js'
 
 const level_of_detail = Generators.input(level_of_detail_input)
 ```
@@ -100,46 +99,18 @@ plot_arrival_frequencies({
 ```
 
 ```js
-// manually define what `map_control` expects
-const map_control_stub = {
-    ward: ward_oi,
-    roads: 5
-}
-
-const stop_times_plot = Plot.plot({
-  width: width,
-  title: `Transit stops in ${ward_oi.name}`,
-  projection: {
-    type: "mercator",
-    domain: rewind(ward_oi.geometry),
-    inset: 10
-  },
-  color: {
-    legend: true,
-    scheme: "Observable10",
-    domain: source_domain
+map_stop_times({
+    title: `Transit stops in ${ward_oi.name}`,
+    width,
+    domain: ward_oi.geometry,
+    map_control_stub: {
+        ward: ward_oi,
+        roads: 5
     },
-  marks: [
-    ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control: map_control_stub }),
-    Plot.dot(stop_times.map(label_schedules), Plot.group(
-        {r: "count"},
-        {
-            x: "stop_lon_normalized",
-            y: "stop_lat_normalized",
-            color: "source",
-            fill: "source",
-            title: d => `#${d.stop_code}: ${stops.find(s => s.stop_code === d.stop_code).stop_name_normalized}`,
-            tip: true,
-            fx: "source",
-            opacity: 0.7
-        }
-    ))
-  ]
+    stop_times,
+    stops,
+    basemap_components: await get_basemap_components()
 })
-```
-
-```js
-stop_times_plot
 ```
 
 
