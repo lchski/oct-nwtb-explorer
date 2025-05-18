@@ -6,7 +6,7 @@ theme: [light, wide]
 import {label_schedules, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
 import {plot_wait_times, plot_arrival_frequencies} from '../lib/charts.js'
-import {roads, ons_neighbourhoods, wards, plot_basemap_components, get_map_domain, stops_to_geojson} from '../lib/maps.js' // TODO: verify which, if any, of these is necessary
+import {map_stop_times, roads, ons_neighbourhoods, wards, get_basemap_components, plot_basemap_components, get_map_domain, stops_to_geojson} from '../lib/maps.js' // TODO: verify which, if any, of these is necessary
 import {rewind} from "jsr:@nshiab/journalism/web"
 
 const level_of_detail = Generators.input(level_of_detail_input)
@@ -70,6 +70,23 @@ const flip_map_orientation = view(Inputs.toggle({label: "Flip map orientation (c
 ```
 
 ```js
+map_stop_times({
+    title: `How often does the ${route_id_oi} stop across its route?`,
+    width,
+    map_control_stub: {
+        ward: {
+            id: 'city'
+        },
+        roads: 4
+    },
+    stop_times,
+    stops,
+    orientation_input: flip_map_orientation,
+    basemap_components: await get_basemap_components()
+})
+```
+
+```js
 // manually define what `map_control` expects
 const map_control_stub = {
     ward: {
@@ -100,7 +117,7 @@ const get_map_orientation = (orientation) => {
 
 const stop_times_plot = Plot.plot({
   width: width,
-  title: `How often does the #${route_id_oi} stop across its route?`,
+  title: `How often does the ${route_id_oi} stop across its route?`,
   projection: {
     type: "mercator",
     domain: stops_to_geojson(stops),
@@ -120,7 +137,7 @@ const stop_times_plot = Plot.plot({
             y: "stop_lat_normalized",
             color: "source",
             fill: "source",
-            title: d => `Stop #${d.stop_code}: ${stops.find(s => s.stop_code === d.stop_code).stop_name_normalized}`,
+            title: d => `#${d.stop_code}: ${stops.find(s => s.stop_code === d.stop_code).stop_name_normalized}`,
             tip: true,
             [get_map_orientation(flip_map_orientation)]: "source",
             opacity: 0.7
@@ -137,12 +154,12 @@ stop_times_plot
 ```js
 plot_wait_times({
     stop_times,
-    title: `How long do you have to wait for the #${route_id_oi}?`,
+    title: `How long do you have to wait for the ${route_id_oi}?`,
     width
 })
 ```
 
-Here are key measures for wait times for the #${route_id_oi}:
+Here are key measures for wait times for the ${route_id_oi}:
 
 ${generateStatsTable(stop_times, 's_until_next_arrival', formatSecondsForStatsTable)}
 
@@ -150,7 +167,7 @@ ${generateStatsTable(stop_times, 's_until_next_arrival', formatSecondsForStatsTa
 ```js
 plot_arrival_frequencies({
     stop_times,
-    title: `How do arrival frequencies for the #${route_id_oi} differ across service windows?`,
+    title: `How do arrival frequencies for the ${route_id_oi} differ across service windows?`,
     subtitle_qualifier: "on this route",
     width: Math.max(width, 550)
 })

@@ -3,6 +3,8 @@ import * as Plot from "npm:@observablehq/plot";
 import * as d3 from "npm:d3";
 import {rewind} from "jsr:@nshiab/journalism/web"; // NB: rewind the four imports below if you want to use conic-conformal projection
 
+import {source_domain, label_schedules} from "./helpers.js"
+
 export const roads = FileAttachment("../data/ottawa.ca/Road_Centrelines_simplify_25.geojson").json()
 
 export const ons_neighbourhoods = FileAttachment("../data/ottawa.ca/ons_boundaries.geojson").json()
@@ -52,6 +54,80 @@ export const plot_basemap_components = ({
 			}
 		),
 	]
+}
+
+export async function get_basemap_components() {
+	return {
+		roads: await FileAttachment("../data/ottawa.ca/Road_Centrelines_simplify_25.geojson").json(),
+		ons_neighbourhoods: await FileAttachment("../data/ottawa.ca/ons_boundaries.geojson").json(),
+		wards: await FileAttachment("../data/ottawa.ca/wards_2022_to_2026.geojson").json()
+	}
+}
+
+export const map_stop_times = ({
+	title = "TKTK?",
+	width,
+	domain = null,
+	map_control_stub = {
+		ward: {
+			id: 'city'
+		},
+		roads: 4
+	},
+	stop_times,
+	stops,
+	orientation_input = false,
+	basemap_components
+}) => Plot.plot({
+	title,
+	width,
+	projection: {
+		type: "mercator",
+		domain: (domain === null) ? stops_to_geojson(stops) : domain,
+		inset: get_map_inset(width)
+	},
+	color: {
+		legend: true,
+		scheme: "Observable10",
+		domain: source_domain
+	},
+	marks: [
+		// ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control: map_control_stub }),
+		...plot_basemap_components({ ...basemap_components, map_control: map_control_stub }),
+		Plot.dot(stop_times.map(label_schedules), Plot.group(
+			{r: "count"},
+			{
+				x: "stop_lon_normalized",
+				y: "stop_lat_normalized",
+				color: "source",
+				fill: "source",
+				title: d => `#${d.stop_code}: ${stops.find(s => s.stop_code === d.stop_code).stop_name_normalized}`,
+				tip: true,
+				[get_map_orientation(orientation_input, stops)]: "source",
+				opacity: 0.7
+			}
+		))
+	]
+})
+
+const get_map_orientation = (orientation_input, stops) => {
+    const domain_ratio = (d3.max(stops, d => d.stop_lon_normalized) - d3.min(stops, d => d.stop_lon_normalized)) / (d3.max(stops, d => d.stop_lat_normalized) - d3.min(stops, d => d.stop_lat_normalized)) // aspect ratio of rendered stops
+    const ratio_breakpoint = 1.5
+
+    if (orientation_input)
+        return (domain_ratio >= ratio_breakpoint) ? 'fx' : 'fy'
+
+    return (domain_ratio >= ratio_breakpoint) ? 'fy' : 'fx'
+}
+
+const get_map_inset = (width) => {
+    if (width < 400)
+        return 5
+
+    if (width < 550)
+        return 10
+
+    return 25
 }
 
 export const get_map_domain = ({ map_control, manual_map_control, city_limits }) => {
