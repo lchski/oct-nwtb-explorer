@@ -134,7 +134,18 @@ md`${routes_at_stop_summary
 </div>
 </div>
 
-TODO... dropdown to select route at stop, to see more specific details, e.g., wait times across windows
+
+
+## Select a route that stops at ${stop_name_pretty}
+
+```js
+const route_oi = view(Inputs.select([null].concat(routes_at_stop), {
+    label: "Route",
+    format: (r) => (r === null) ? '' : `${r.route_id}: ${r.direction}`
+}))
+```
+
+
 
 <!-- Loading -->
 
@@ -167,15 +178,21 @@ const routes_at_stop_summary = aq.from(stop_times)
     .orderby('source', 'route_id', 'direction_id', aq.desc('n_arrivals'))
     .groupby('source', 'route_id', 'direction_id')
     .rollup({
-        headsign_combined: d => aq.op.join(aq.op.array_agg_distinct(d.trip_headsign), ' // '),
+        headsign_combined: d => aq.op.join(aq.op.array_agg_distinct(d.trip_headsign), ', '),
         n_arrivals: d => aq.op.sum(d.n_arrivals),
         wait_times: d => aq.op.array_agg(d.wait_times)
     })
     .derive({
         avg_wait_time: aq.escape(d => Math.round(d3.mean(d3.merge(d.wait_times)) / 60))
     })
-    .orderby('source', 'route_id', 'direction_id')
-    .impute({ avg_wait_time: () => '-' })
+    .derive({
+        route_id_numeric: d => aq.op.parse_int(d.route_id)
+    })
+    .impute({
+        avg_wait_time: () => '-',
+        route_id_numeric: () => 99999 // sort non-numeric route IDs like "E1" to the end of the list
+    })
+    .orderby('source', 'route_id_numeric', 'direction_id')
     .select({
         source: 'source',
         route_id: 'Route',
@@ -183,4 +200,28 @@ const routes_at_stop_summary = aq.from(stop_times)
         n_arrivals: 'Arrivals (#)',
         avg_wait_time: 'Wait (mins, avg)'
     })
+
+const routes_at_stop = aq.from(stop_times)
+    .groupby('route_id', 'trip_headsign')
+    .count()
+    .orderby('route_id', aq.desc('count'))
+    .groupby('route_id')
+    .rollup({
+        direction: d => aq.op.join(aq.op.array_agg_distinct(d.trip_headsign), ', '),
+        n_arrivals: d => aq.op.sum(d.count)
+    })
+    .derive({
+        route_id_numeric: d => aq.op.parse_int(d.route_id)
+    })
+    .impute({
+        route_id_numeric: () => 99999 // sort non-numeric route IDs like "E1" to the end of the list
+    })
+    .orderby('route_id_numeric')
+    .objects()
+```
+
+```js
+const route_id_oi = (route_oi === null) ? null : route_oi.route_id
+
+const st_oi = stop_times.filter(st => st.route_id === route_id_oi)
 ```
