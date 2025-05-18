@@ -4,7 +4,7 @@ toc: false
 ---
 
 ```js
-import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, generateStatsTable, formatSecondsForStatsTable, source_domain, md} from '../lib/helpers.js'
+import {to_pct, ch_incr_decr, generateStatsTable, formatSecondsForStatsTable, md} from '../lib/helpers.js'
 import {plot_wait_times, plot_arrival_frequencies} from '../lib/charts.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
 

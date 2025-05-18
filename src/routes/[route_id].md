@@ -3,7 +3,7 @@ theme: [light, wide]
 ---
 
 ```js
-import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
+import {label_schedules, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
 import {plot_wait_times, plot_arrival_frequencies} from '../lib/charts.js'
 import {roads, ons_neighbourhoods, wards, plot_basemap_components, get_map_domain, stops_to_geojson} from '../lib/maps.js' // TODO: verify which, if any, of these is necessary

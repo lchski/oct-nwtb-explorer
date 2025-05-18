@@ -4,7 +4,7 @@ toc: false
 ---
 
 ```js
-import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, label_route_url} from './lib/helpers.js'
+import {label_schedules, label_route_ids, label_route_url} from './lib/helpers.js'
 ```
 
 # Routes

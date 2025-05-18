@@ -4,7 +4,7 @@ theme: [light, wide]
 ---
 
 ```js
-import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules, source_domain} from './lib/helpers.js'
+import {label_wards, label_schedules, source_domain} from './lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from './lib/controls.js'
 
 const level_of_detail = Generators.input(level_of_detail_input)

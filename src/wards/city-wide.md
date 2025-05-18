@@ -3,7 +3,7 @@ theme: [light, wide]
 ---
 
 ```js
-import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
+import {generateStatsTable, formatSecondsForStatsTable} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
 import {plot_wait_times, plot_arrival_frequencies, plot_st_per_stop_histogram} from '../lib/charts.js'
 
