@@ -139,11 +139,16 @@ md`${routes_at_stop_summary
 ## Select a route that stops at ${stop_name_pretty}
 
 ```js
-const route_oi = view(Inputs.select([null].concat(routes_at_stop), {
+const route_oi = view(Inputs.select(routes_at_stop, {
     label: "Route",
-    format: (r) => (r === null) ? '' : `${r.route_id}: ${r.direction}`
+    format: (r) => `${r.route_id}: ${r.direction}`
 }))
 ```
+
+At ${stop_name_pretty}, buses or trains from route ${route_id_oi} (direction: ${route_oi.direction}):
+- previously stopped ${st_oi_p.length.toLocaleString()} times
+- now stop ${st_oi_n.length.toLocaleString()} times (${ch_incr_decr(st_oi_n.length - st_oi_p.length, true)}${Math.abs(st_oi_n.length - st_oi_p.length)}, a ${to_pct((st_oi_n.length - st_oi_p.length) / st_oi_p.length)}% change)
+
 
 
 
@@ -202,10 +207,10 @@ const routes_at_stop_summary = aq.from(stop_times)
     })
 
 const routes_at_stop = aq.from(stop_times)
-    .groupby('route_id', 'trip_headsign')
+    .groupby('route_id', 'direction_id', 'trip_headsign')
     .count()
     .orderby('route_id', aq.desc('count'))
-    .groupby('route_id')
+    .groupby('route_id', 'direction_id')
     .rollup({
         direction: d => aq.op.join(aq.op.array_agg_distinct(d.trip_headsign), ', '),
         n_arrivals: d => aq.op.sum(d.count)
@@ -221,7 +226,10 @@ const routes_at_stop = aq.from(stop_times)
 ```
 
 ```js
-const route_id_oi = (route_oi === null) ? null : route_oi.route_id
+const route_id_oi = route_oi.route_id
 
-const st_oi = stop_times.filter(st => st.route_id === route_id_oi)
+const st_oi = stop_times.filter(st => st.route_id === route_id_oi && st.direction_id === route_oi.direction_id)
+
+const st_oi_p = st_oi.filter(st => st.source === "current")
+const st_oi_n = st_oi.filter(st => st.source === "new")
 ```
