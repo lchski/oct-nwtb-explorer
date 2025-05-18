@@ -5,7 +5,7 @@ theme: [light, wide]
 ```js
 import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
-import {plot_wait_times} from '../lib/charts.js'
+import {plot_wait_times, plot_arrival_frequencies} from '../lib/charts.js'
 import {roads, ons_neighbourhoods, wards, plot_basemap_components, get_map_domain, stops_to_geojson} from '../lib/maps.js' // TODO: verify which, if any, of these is necessary
 import {rewind} from "jsr:@nshiab/journalism/web"
 
@@ -148,32 +148,11 @@ ${generateStatsTable(stop_times, 's_until_next_arrival', formatSecondsForStatsTa
 
 
 ```js
-Plot.plot({
+plot_arrival_frequencies({
+    stop_times,
     title: `How do arrival frequencies for the #${route_id_oi} differ across service windows?`,
-    subtitle: "Counts how many times buses or trains arrive on this route during the selected service windows, previous schedule vs. NWTB",
-    width: Math.max(width, 550),
-    x: {axis: null, label: "Schedule"},
-    fx: {label: "Schedule"},
-    y: {label: "Arrival frequency", tickFormat: "s", grid: true},
-    color: {legend: true, domain: source_domain},
-    marks: [
-        Plot.barY(stop_times.map(label_service_windows).map(label_schedules), Plot.group(
-            {y: "count"},
-            {
-                y: "service_window",
-                x: "source",
-                fx: "service_window",
-                fill: "source",
-                tip: {
-                    pointer: "x",
-                    format: {
-                        fx: false,
-                        fill: false,
-                    }
-                }
-            }
-        ))
-    ]
+    subtitle_qualifier: "on this route",
+    width: Math.max(width, 550)
 })
 ```
 

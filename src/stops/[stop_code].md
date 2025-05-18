@@ -5,7 +5,7 @@ toc: false
 
 ```js
 import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, generateStatsTable, formatSecondsForStatsTable, source_domain, md} from '../lib/helpers.js'
-import {plot_wait_times} from '../lib/charts.js'
+import {plot_wait_times, plot_arrival_frequencies} from '../lib/charts.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
 
 const level_of_detail = Generators.input(level_of_detail_input)
@@ -37,32 +37,11 @@ ${service_period_desc}
 Buses or trains previously stopped ${st_p.length.toLocaleString()} times at ${stop_name_pretty}. Under the new schedule, they stop ${st_n.length.toLocaleString()} times (${ch_incr_decr(st_n.length - st_p.length, true)}${Math.abs(st_n.length - st_p.length)}, a ${to_pct((st_n.length - st_p.length) / st_p.length)}% change).
 
 ```js
-Plot.plot({
+plot_arrival_frequencies({
+    stop_times,
     title: `How do arrival frequencies at ${stop_name_pretty} differ across service windows?`,
-    subtitle: "Counts how many times buses or trains arrive at the stop during the selected service windows, previous schedule vs. NWTB",
-    width: Math.max(width, 550),
-    x: {axis: null, label: "Schedule"},
-    fx: {label: "Schedule"},
-    y: {label: "Arrival frequency", tickFormat: "s", grid: true},
-    color: {legend: true, domain: source_domain},
-    marks: [
-        Plot.barY(stop_times.map(label_service_windows).map(label_schedules), Plot.group(
-            {y: "count"},
-            {
-                y: "service_window",
-                x: "source",
-                fx: "service_window",
-                fill: "source",
-                tip: {
-                    pointer: "x",
-                    format: {
-                        fx: false,
-                        fill: false,
-                    }
-                }
-            }
-        ))
-    ]
+    subtitle_qualifier: "at the stop",
+    width: Math.max(width, 550)
 })
 ```
 
@@ -135,32 +114,11 @@ const route_oi_link = html.fragment`<a href="/routes/${route_oi.route_id}">explo
 You can also ${route_oi_link} itself in more detail.
 
 ```js
-Plot.plot({
+plot_arrival_frequencies({
+    stop_times: st_oi,
     title: `How do arrival frequencies for ${route_oi.route_id} (${route_oi.direction}) at ${stop_name_pretty} differ across service windows?`,
-    subtitle: "Counts how many times buses or trains arrive at the stop during the selected service windows, previous schedule vs. NWTB",
-    width: Math.max(width, 550),
-    x: {axis: null, label: "Schedule"},
-    fx: {label: "Schedule"},
-    y: {label: "Arrival frequency", tickFormat: "s", grid: true},
-    color: {legend: true, domain: source_domain},
-    marks: [
-        Plot.barY(st_oi.map(label_service_windows).map(label_schedules), Plot.group(
-            {y: "count"},
-            {
-                y: "service_window",
-                x: "source",
-                fx: "service_window",
-                fill: "source",
-                tip: {
-                    pointer: "x",
-                    format: {
-                        fx: false,
-                        fill: false,
-                    }
-                }
-            }
-        ))
-    ]
+    subtitle_qualifier: "at the stop",
+    width: Math.max(width, 550)
 })
 ```
 

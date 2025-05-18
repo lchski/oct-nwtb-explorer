@@ -5,7 +5,7 @@ theme: [light, wide]
 ```js
 import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
-import {plot_wait_times} from '../lib/charts.js'
+import {plot_wait_times, plot_arrival_frequencies} from '../lib/charts.js'
 import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from '../lib/maps.js'
 import {rewind} from "jsr:@nshiab/journalism/web"
 
@@ -111,32 +111,11 @@ const st_per_stop_new_mean = Math.round(d3.mean(stop_times_per_stop.filter(st =>
 _A mean value of ${st_per_stop_new_mean} indicates that the average stop in ${ward_oi.name} has ${st_per_stop_new_mean} arrivals during the service period you’ve selected above. Some stops will have more frequent arrivals, and others less frequent, as indicated by the range value._
 
 ```js
-Plot.plot({
+plot_arrival_frequencies({
+    stop_times,
     title: `How do arrival frequencies in ${ward_oi.name} differ across service windows?`,
-    subtitle: "Counts how many times buses arrive at stops during the selected service windows, previous schedule vs. NWTB",
+    subtitle_qualifier: "at stops",
     width: Math.max(width, 550),
-    x: {axis: null, label: "Schedule"},
-    fx: {label: "Schedule"},
-    y: {label: "Arrival frequency", tickFormat: "s", grid: true},
-    color: {legend: true, domain: source_domain},
-    marks: [
-        Plot.barY(stop_times.map(label_service_windows).map(label_schedules), Plot.group(
-            {y: "count"},
-            {
-                y: "service_window",
-                x: "source",
-                fx: "service_window",
-                fill: "source",
-                tip: {
-                    pointer: "x",
-                    format: {
-                        fx: false,
-                        fill: false,
-                    }
-                }
-            }
-        ))
-    ]
 })
 ```
 
