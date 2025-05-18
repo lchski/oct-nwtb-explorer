@@ -50,7 +50,7 @@ export default {
       yield `/routes/${route_id}`;
     }
 
-    const stop_codes = await octdb.runAndReadAll(`SELECT DISTINCT stop_code FROM routes`)
+    const stop_codes = await octdb.runAndReadAll(`SELECT DISTINCT stop_code FROM stops`)
 
     for await (const {stop_code} of stop_codes.getRowObjects()) {
       yield `/stops/${stop_code}`;
