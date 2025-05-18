@@ -5,7 +5,7 @@ theme: [light, wide]
 ```js
 import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
-import {plot_wait_times, plot_arrival_frequencies} from '../lib/charts.js'
+import {plot_wait_times, plot_arrival_frequencies, plot_st_per_stop_histogram} from '../lib/charts.js'
 import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from '../lib/maps.js'
 import {rewind} from "jsr:@nshiab/journalism/web"
 
@@ -70,31 +70,11 @@ const stop_times_oi_per_stop_above_cutoff = stop_times_per_stop.filter(s => s.n_
 ```
 
 ```js
-Plot.plot({
+plot_st_per_stop_histogram({
+    stop_times_per_stop,
     title: `How busy are stops in ${ward_oi.name}?`,
-    subtitle: `Histogram of how many times buses or trains arrive at each stop, previous schedule vs. NWTB (cut off at ${stop_times_oi_cutoff}, see below)`,
     width,
-    x: {label: "Arrival frequency"},
-    y: {label: "Number of stops", tickFormat: "s", grid: true},
-    color: {domain: source_domain},
-    marks: [
-        Plot.rectY(stop_times_per_stop.map(label_schedules), Plot.binX({y: "count"}, {
-            x: "n_stop_times",
-            fill: "source",
-            fx: "source",
-            // thresholds: [...Array(300 / 20 + 1)].map((_, index) => index * 20),
-            interval: 20,
-            domain: [0, stop_times_oi_cutoff],
-            tip: {
-                pointer: "x",
-                format: {
-                    fx: false,
-                    fill: false,
-                }
-            }
-        })),
-        Plot.axisFx({label: "Schedule"})
-    ]
+    stop_times_cutoff: stop_times_oi_cutoff
 })
 ```
 

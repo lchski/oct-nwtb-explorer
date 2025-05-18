@@ -82,3 +82,43 @@ export const plot_arrival_frequencies = ({
         ))
     ]
 }) : html`<figure><h2>${title}</h2><em>Buses or trains do not arrive ${subtitle_qualifier} during the selected service windows. (Otherwise, there’d be a chart here.)</em></figure>`
+
+/**
+ * 
+ * @param {Object[]} stop_times_per_stop Array of Objects with properties: n_stop_times, source
+ * @param {String} title
+ * @param {Numeric} width Observable width value
+ * @param {Numeric} stop_times_cutoff
+ * @returns 
+ */
+export const plot_st_per_stop_histogram = ({
+    stop_times_per_stop,
+    title = "How busy are stops in TKTK?",
+    width,
+    stop_times_cutoff = 300
+}) => Plot.plot({
+    title,
+    subtitle: `Histogram of how many times buses or trains arrive at each stop, previous schedule vs. NWTB (cut off at ${stop_times_cutoff}, see below)`,
+    width,
+    x: {label: "Arrival frequency"},
+    y: {label: "Number of stops", tickFormat: "s", grid: true},
+    color: {domain: source_domain},
+    marks: [
+        Plot.rectY(stop_times_per_stop.map(label_schedules), Plot.binX({y: "count"}, {
+            x: "n_stop_times",
+            fill: "source",
+            fx: "source",
+            // thresholds: [...Array(300 / 20 + 1)].map((_, index) => index * 20),
+            interval: 20,
+            domain: [0, stop_times_cutoff],
+            tip: {
+                pointer: "x",
+                format: {
+                    fx: false,
+                    fill: false,
+                }
+            }
+        })),
+        Plot.axisFx({label: "Schedule"})
+    ]
+})
