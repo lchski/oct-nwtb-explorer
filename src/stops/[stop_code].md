@@ -1,9 +1,10 @@
 ---
 theme: [light, wide]
+toc: false
 ---
 
 ```js
-import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
+import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, generateStatsTable, formatSecondsForStatsTable, source_domain, md} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
 
 const level_of_detail = Generators.input(level_of_detail_input)
@@ -30,7 +31,7 @@ ${service_period_desc}
 </div>
 
 
-## Details for stop ${stop_name_pretty}
+## Details for ${stop_name_pretty}
 
 Buses or trains previously stopped ${st_p.length.toLocaleString()} times at ${stop_name_pretty}. Under the new schedule, they stop ${st_n.length.toLocaleString()} times (${ch_incr_decr(st_n.length - st_p.length, true)}${Math.abs(st_n.length - st_p.length)}, a ${to_pct((st_n.length - st_p.length) / st_p.length)}% change).
 
@@ -104,9 +105,35 @@ ${generateStatsTable(stop_times, 's_until_next_arrival', formatSecondsForStatsTa
 
 This plot and table show _all_ the wait times at ${stop_name_pretty}. If multiple routes serve the stop, see below for details by route.
 
+## Routes at ${stop_name_pretty}
+
+<div class="grid grid-cols-2">
+    <div class="card">
+        <h3>Previous</h3>
+
+```js
+md`${routes_at_stop
+    .filter(d => d.source === "current")
+    .select(aq.not('source'))
+    .toMarkdown()}`
+```
+
+
+</div>
+<div class="card">
+    <h3>New</h3>
+
+
+```js
+md`${routes_at_stop
+    .filter(d => d.source === "new")
+    .select(aq.not('source'))
+    .toMarkdown()}`
+```
+
+</div>
 
 TODO... dropdown to select route at stop, to see more specific details, e.g., wait times across windows
-
 
 <!-- Loading -->
 
@@ -127,4 +154,23 @@ const stops = stops_raw.toArray()
 const stop_code_oi = observable.params.stop_code
 const stop_name_oi = stops.find(d => d.stop_code === stop_code_oi).stop_name_normalized
 const stop_name_pretty = `${stop_name_oi} (${stop_code_oi})`
+```
+
+```js
+const routes_at_stop = aq.from(stop_times)
+    .groupby('source', 'route_id', 'direction_id')
+    .rollup({
+        headsign_combined: d => aq.op.join(aq.op.array_agg_distinct(d.trip_headsign), ' // '),
+        n_arrivals: d => aq.op.count(),
+        avg_wait_time: d => aq.op.round(aq.op.mean(d.s_until_next_arrival) / 60)
+    })
+    .orderby('source', 'route_id', 'direction_id')
+    .impute({ avg_wait_time: () => '' })
+    .select({
+        source: 'source',
+        route_id: 'Route',
+        headsign_combined: 'Direction (combines route labels)',
+        n_arrivals: 'Arrivals (#)',
+        avg_wait_time: 'Wait (mins, avg)'
+    })
 ```
