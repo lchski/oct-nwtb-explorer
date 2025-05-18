@@ -5,6 +5,7 @@ theme: [light, wide]
 ```js
 import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
+import {plot_wait_times, plot_arrival_frequencies, plot_st_per_stop_histogram} from '../lib/charts.js'
 import {roads, ons_neighbourhoods, wards, city_limits, plot_basemap_components, get_map_domain} from '../lib/maps.js'
 import {rewind} from "jsr:@nshiab/journalism/web"
 
@@ -44,30 +45,10 @@ During the service period you’ve selected above, ${ward_oi.name} has:
 Buses or trains arrive at these stops ${stop_times.filter(st => st.source === "new").length.toLocaleString()} times in the new schedule.
 
 ```js
-Plot.plot({
+plot_wait_times({
+    stop_times,
     title: `How long do you have to wait for your next train / bus in ${ward_oi.name}?`,
-    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than 45 minutes), previous schedule vs. NWTB`,
-    width,
-    x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
-    y: {label: "Percentage (%)", percent: true, grid: true},
-    color: {domain: source_domain},
-    marks: [
-        Plot.rectY(stop_times.map(label_schedules), Plot.binX({y: "proportion-facet"}, {
-            x: "s_until_next_arrival",
-            fill: "source",
-            fx: "source",
-            interval: 5 * 60, // we format from seconds to minutes, so do the equivalent here
-            domain: [0, 45 * 60],
-            tip: {
-                pointer: "x",
-                format: {
-                    fx: false,
-                    fill: false,
-                }
-            }
-        })),
-        Plot.axisFx({label: "Schedule"})
-    ]
+    width
 })
 ```
 
@@ -89,31 +70,11 @@ const stop_times_oi_per_stop_above_cutoff = stop_times_per_stop.filter(s => s.n_
 ```
 
 ```js
-Plot.plot({
+plot_st_per_stop_histogram({
+    stop_times_per_stop,
     title: `How busy are stops in ${ward_oi.name}?`,
-    subtitle: `Histogram of how many times buses or trains arrive at each stop, previous schedule vs. NWTB (cut off at ${stop_times_oi_cutoff}, see below)`,
     width,
-    x: {label: "Arrival frequency"},
-    y: {label: "Number of stops", tickFormat: "s", grid: true},
-    color: {domain: source_domain},
-    marks: [
-        Plot.rectY(stop_times_per_stop.map(label_schedules), Plot.binX({y: "count"}, {
-            x: "n_stop_times",
-            fill: "source",
-            fx: "source",
-            // thresholds: [...Array(300 / 20 + 1)].map((_, index) => index * 20),
-            interval: 20,
-            domain: [0, stop_times_oi_cutoff],
-            tip: {
-                pointer: "x",
-                format: {
-                    fx: false,
-                    fill: false,
-                }
-            }
-        })),
-        Plot.axisFx({label: "Schedule"})
-    ]
+    stop_times_cutoff: stop_times_oi_cutoff
 })
 ```
 
@@ -130,32 +91,11 @@ const st_per_stop_new_mean = Math.round(d3.mean(stop_times_per_stop.filter(st =>
 _A mean value of ${st_per_stop_new_mean} indicates that the average stop in ${ward_oi.name} has ${st_per_stop_new_mean} arrivals during the service period you’ve selected above. Some stops will have more frequent arrivals, and others less frequent, as indicated by the range value._
 
 ```js
-Plot.plot({
+plot_arrival_frequencies({
+    stop_times,
     title: `How do arrival frequencies in ${ward_oi.name} differ across service windows?`,
-    subtitle: "Counts how many times buses arrive at stops during the selected service windows, previous schedule vs. NWTB",
+    subtitle_qualifier: "at stops",
     width: Math.max(width, 550),
-    x: {axis: null, label: "Schedule"},
-    fx: {label: "Schedule"},
-    y: {label: "Arrival frequency", tickFormat: "s", grid: true},
-    color: {legend: true, domain: source_domain},
-    marks: [
-        Plot.barY(stop_times.map(label_service_windows).map(label_schedules), Plot.group(
-            {y: "count"},
-            {
-                y: "service_window",
-                x: "source",
-                fx: "service_window",
-                fill: "source",
-                tip: {
-                    pointer: "x",
-                    format: {
-                        fx: false,
-                        fill: false,
-                    }
-                }
-            }
-        ))
-    ]
 })
 ```
 

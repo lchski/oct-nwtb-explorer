@@ -5,6 +5,7 @@ toc: false
 
 ```js
 import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, generateStatsTable, formatSecondsForStatsTable, source_domain, md} from '../lib/helpers.js'
+import {plot_wait_times, plot_arrival_frequencies} from '../lib/charts.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
 
 const level_of_detail = Generators.input(level_of_detail_input)
@@ -36,67 +37,20 @@ ${service_period_desc}
 Buses or trains previously stopped ${st_p.length.toLocaleString()} times at ${stop_name_pretty}. Under the new schedule, they stop ${st_n.length.toLocaleString()} times (${ch_incr_decr(st_n.length - st_p.length, true)}${Math.abs(st_n.length - st_p.length)}, a ${to_pct((st_n.length - st_p.length) / st_p.length)}% change).
 
 ```js
-Plot.plot({
+plot_arrival_frequencies({
+    stop_times,
     title: `How do arrival frequencies at ${stop_name_pretty} differ across service windows?`,
-    subtitle: "Counts how many times buses or trains arrive at the stop during the selected service windows, previous schedule vs. NWTB",
-    width: Math.max(width, 550),
-    x: {axis: null, label: "Schedule"},
-    fx: {label: "Schedule"},
-    y: {label: "Arrival frequency", tickFormat: "s", grid: true},
-    color: {legend: true, domain: source_domain},
-    marks: [
-        Plot.barY(stop_times.map(label_service_windows).map(label_schedules), Plot.group(
-            {y: "count"},
-            {
-                y: "service_window",
-                x: "source",
-                fx: "service_window",
-                fill: "source",
-                tip: {
-                    pointer: "x",
-                    format: {
-                        fx: false,
-                        fill: false,
-                    }
-                }
-            }
-        ))
-    ]
+    subtitle_qualifier: "at the stop",
+    width: Math.max(width, 550)
 })
 ```
 
 ```js
-const wait_times_cutoff_min = 45
-
-const wait_times_plot = (stop_times.filter(d => d.s_until_next_arrival !== null && (d.s_until_next_arrival / 60) < wait_times_cutoff_min).length > 0) ? Plot.plot({
+plot_wait_times({
+    stop_times,
     title: `How long do you have to wait for your next train / bus at ${stop_name_pretty}?`,
-    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than ${wait_times_cutoff_min} minutes), previous schedule vs. NWTB`,
-    width,
-    x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
-    y: {label: "Percentage (%)", percent: true, grid: true},
-	color: {domain: source_domain},
-    marks: [
-        Plot.rectY(stop_times.map(label_schedules), Plot.binX({y: "proportion-facet"}, {
-            x: "s_until_next_arrival",
-            fill: "source",
-            fx: "source",
-            interval: 5 * 60, // we format from seconds to minutes, so do the equivalent here
-            domain: [0, wait_times_cutoff_min * 60],
-            tip: {
-                pointer: "x",
-                format: {
-                    fx: false,
-                    fill: false,
-                }
-            }
-        })),
-        Plot.axisFx({label: "Schedule"})
-    ]
-}) : html`<figure><h2>How long do you have to wait for your next train / bus at ${stop_name_pretty}?</h2><em>All wait times are longer than ${wait_times_cutoff_min} minutes. (Otherwise, there’d be a chart here.)</em></figure>`
-```
-
-```js
-wait_times_plot
+    width
+})
 ```
 
 Here are key measures for wait times at ${stop_name_pretty}:
@@ -160,65 +114,20 @@ const route_oi_link = html.fragment`<a href="/routes/${route_oi.route_id}">explo
 You can also ${route_oi_link} itself in more detail.
 
 ```js
-Plot.plot({
+plot_arrival_frequencies({
+    stop_times: st_oi,
     title: `How do arrival frequencies for ${route_oi.route_id} (${route_oi.direction}) at ${stop_name_pretty} differ across service windows?`,
-    subtitle: "Counts how many times buses or trains arrive at the stop during the selected service windows, previous schedule vs. NWTB",
-    width: Math.max(width, 550),
-    x: {axis: null, label: "Schedule"},
-    fx: {label: "Schedule"},
-    y: {label: "Arrival frequency", tickFormat: "s", grid: true},
-    color: {legend: true, domain: source_domain},
-    marks: [
-        Plot.barY(st_oi.map(label_service_windows).map(label_schedules), Plot.group(
-            {y: "count"},
-            {
-                y: "service_window",
-                x: "source",
-                fx: "service_window",
-                fill: "source",
-                tip: {
-                    pointer: "x",
-                    format: {
-                        fx: false,
-                        fill: false,
-                    }
-                }
-            }
-        ))
-    ]
+    subtitle_qualifier: "at the stop",
+    width: Math.max(width, 550)
 })
 ```
 
 ```js
-const route_wait_times_plot = (st_oi.filter(d => d.s_until_next_arrival !== null && (d.s_until_next_arrival / 60) < wait_times_cutoff_min).length > 0) ? Plot.plot({
+plot_wait_times({
+    stop_times: st_oi,
     title: `How long do you have to wait for the next ${route_oi.route_id} (${route_oi.direction}) at ${stop_name_pretty}?`,
-    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than ${wait_times_cutoff_min} minutes), previous schedule vs. NWTB`,
-    width,
-    x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
-    y: {label: "Percentage (%)", percent: true, grid: true},
-	color: {domain: source_domain},
-    marks: [
-        Plot.rectY(st_oi.map(label_schedules), Plot.binX({y: "proportion-facet"}, {
-            x: "s_until_next_arrival",
-            fill: "source",
-            fx: "source",
-            interval: 5 * 60, // we format from seconds to minutes, so do the equivalent here
-            domain: [0, wait_times_cutoff_min * 60],
-            tip: {
-                pointer: "x",
-                format: {
-                    fx: false,
-                    fill: false,
-                }
-            }
-        })),
-        Plot.axisFx({label: "Schedule"})
-    ]
-}) : html`<figure><h2>How long do you have to wait for your next train / bus from your selected route at ${stop_name_pretty}?</h2><em>All wait times are longer than ${wait_times_cutoff_min} minutes. (Otherwise, there’d be a chart here.)</em></figure>`
-```
-
-```js
-route_wait_times_plot
+    width
+})
 ```
 
 Here are key measures for wait times for the ${route_id_oi} (${route_oi.direction}) at ${stop_name_pretty}:
