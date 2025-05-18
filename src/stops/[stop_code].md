@@ -112,7 +112,7 @@ This plot and table show _all_ the wait times at ${stop_name_pretty}. If multipl
         <h3>Previous</h3>
 
 ```js
-md`${routes_at_stop
+md`${routes_at_stop_summary
     .filter(d => d.source === "current")
     .select(aq.not('source'))
     .toMarkdown()}`
@@ -125,12 +125,13 @@ md`${routes_at_stop
 
 
 ```js
-md`${routes_at_stop
+md`${routes_at_stop_summary
     .filter(d => d.source === "new")
     .select(aq.not('source'))
     .toMarkdown()}`
 ```
 
+</div>
 </div>
 
 TODO... dropdown to select route at stop, to see more specific details, e.g., wait times across windows
@@ -157,15 +158,24 @@ const stop_name_pretty = `${stop_name_oi} (${stop_code_oi})`
 ```
 
 ```js
-const routes_at_stop = aq.from(stop_times)
+const routes_at_stop_summary = aq.from(stop_times)
+    .groupby('source', 'route_id', 'direction_id', 'trip_headsign')
+    .rollup({
+        n_arrivals: d => aq.op.count(),
+        wait_times: d => aq.op.array_agg(d.s_until_next_arrival)
+    })
+    .orderby('source', 'route_id', 'direction_id', aq.desc('n_arrivals'))
     .groupby('source', 'route_id', 'direction_id')
     .rollup({
         headsign_combined: d => aq.op.join(aq.op.array_agg_distinct(d.trip_headsign), ' // '),
-        n_arrivals: d => aq.op.count(),
-        avg_wait_time: d => aq.op.round(aq.op.mean(d.s_until_next_arrival) / 60)
+        n_arrivals: d => aq.op.sum(d.n_arrivals),
+        wait_times: d => aq.op.array_agg(d.wait_times)
+    })
+    .derive({
+        avg_wait_time: aq.escape(d => Math.round(d3.mean(d3.merge(d.wait_times)) / 60))
     })
     .orderby('source', 'route_id', 'direction_id')
-    .impute({ avg_wait_time: () => '' })
+    .impute({ avg_wait_time: () => '-' })
     .select({
         source: 'source',
         route_id: 'Route',
