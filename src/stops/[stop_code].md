@@ -138,22 +138,21 @@ ${generateStatsTable(st_oi, 's_until_next_arrival', formatSecondsForStatsTable)}
 <!-- Loading -->
 
 ```js
+const stop = FileAttachment(`./${observable.params.stop_code}.json`).json()
+```
+
+```js
+const stop_code_oi = stop.stop_code
+const stop_name_oi = stop.stop_name_normalized
+const stop_name_pretty = `${stop_name_oi} (${stop_code_oi})`
+```
+
+```js
 const stop_times_raw = await FileAttachment(`../data/generated/stops/stop_times/${observable.params.stop_code}.parquet`).parquet()
 const stop_times = stop_times_raw.toArray().filter(d => selected_service_windows(level_of_detail).includes(d.service_window) && selected_service_ids(level_of_detail).includes(d.service_id))
 
 const st_p = stop_times.filter(st => st.source === "current")
 const st_n = stop_times.filter(st => st.source === "new")
-```
-
-```js
-const stops_raw = await FileAttachment(`../data/octranspo.com/stops_normalized.parquet`).parquet()
-const stops = stops_raw.toArray()
-```
-
-```js
-const stop_code_oi = observable.params.stop_code
-const stop_name_oi = stops.find(d => d.stop_code === stop_code_oi).stop_name_normalized
-const stop_name_pretty = `${stop_name_oi} (${stop_code_oi})`
 ```
 
 ```js
