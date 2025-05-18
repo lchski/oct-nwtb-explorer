@@ -92,7 +92,6 @@ export const map_stop_times = ({
 		domain: source_domain
 	},
 	marks: [
-		// ...plot_basemap_components({ wards, ons_neighbourhoods, roads, map_control: map_control_stub }),
 		...plot_basemap_components({ ...basemap_components, map_control: map_control_stub }),
 		Plot.dot(stop_times.map(label_schedules), Plot.group(
 			{r: "count"},
