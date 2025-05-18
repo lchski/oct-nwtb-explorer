@@ -59,8 +59,8 @@ export const plot_arrival_frequencies = ({
     title,
     subtitle: `Counts how many times buses or trains arrive ${subtitle_qualifier} during the selected service windows, previous schedule vs. NWTB`,
     width,
-    x: {axis: null, label: "Schedule"},
-    fx: {label: "Schedule"},
+    x: {axis: null, label: "Time of day"},
+    fx: {label: "Time of day (service window)"},
     y: {label: "Arrival frequency", tickFormat: "s", grid: true},
     color: {legend: true, domain: source_domain},
     marks: [
