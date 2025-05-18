@@ -5,6 +5,7 @@ theme: [light, wide]
 ```js
 import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
+import {plot_wait_times} from '../lib/charts.js'
 
 const level_of_detail = Generators.input(level_of_detail_input)
 ```
@@ -40,30 +41,10 @@ During the service period you’ve selected above, ${ward_oi.name} has:
 Buses or trains arrive at these stops ${stop_times.filter(st => st.source === "new").length.toLocaleString()} times in the new schedule.
 
 ```js
-Plot.plot({
+plot_wait_times({
+    stop_times,
     title: `How long do you have to wait for your next train / bus in ${ward_oi.name}?`,
-    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than 45 minutes), previous schedule vs. NWTB`,
-    width,
-    x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
-    y: {label: "Percentage (%)", percent: true, grid: true},
-    color: {domain: source_domain},
-    marks: [
-        Plot.rectY(stop_times.map(label_schedules), Plot.binX({y: "proportion-facet"}, {
-            x: "s_until_next_arrival",
-            fill: "source",
-            fx: "source",
-            interval: 5 * 60, // we format from seconds to minutes, so do the equivalent here
-            domain: [0, 45 * 60],
-            tip: {
-                pointer: "x",
-                format: {
-                    fx: false,
-                    fill: false,
-                }
-            }
-        })),
-        Plot.axisFx({label: "Schedule"})
-    ]
+    width
 })
 ```
 

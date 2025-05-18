@@ -5,6 +5,7 @@ theme: [light, wide]
 ```js
 import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
+import {plot_wait_times} from '../lib/charts.js'
 import {roads, ons_neighbourhoods, wards, plot_basemap_components, get_map_domain, stops_to_geojson} from '../lib/maps.js' // TODO: verify which, if any, of these is necessary
 import {rewind} from "jsr:@nshiab/journalism/web"
 
@@ -134,37 +135,11 @@ stop_times_plot
 ```
 
 ```js
-const wait_times_cutoff_min = 45
-
-const wait_times_plot = (stop_times.filter(d => d.s_until_next_arrival !== null && (d.s_until_next_arrival / 60) < wait_times_cutoff_min).length > 0) ? Plot.plot({
+plot_wait_times({
+    stop_times,
     title: `How long do you have to wait for the #${route_id_oi}?`,
-    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than ${wait_times_cutoff_min} minutes), previous schedule vs. NWTB`,
-    width,
-    x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
-    y: {label: "Percentage (%)", percent: true, grid: true},
-    color: {domain: source_domain},
-    marks: [
-        Plot.rectY(stop_times.map(label_schedules), Plot.binX({y: "proportion-facet"}, {
-            x: "s_until_next_arrival",
-            fill: "source",
-            fx: "source",
-            interval: 5 * 60, // we format from seconds to minutes, so do the equivalent here
-            domain: [0, wait_times_cutoff_min * 60],
-            tip: {
-                pointer: "x",
-                format: {
-                    fx: false,
-                    fill: false,
-                }
-            }
-        })),
-        Plot.axisFx({label: "Schedule"})
-    ]
-}) : html`<figure><h2>How long do you have to wait for the #${route_id_oi}?</h2><em>All wait times are longer than ${wait_times_cutoff_min} minutes. (Otherwise, there’d be a chart here.)</em></figure>`
-```
-
-```js
-wait_times_plot
+    width
+})
 ```
 
 Here are key measures for wait times for the #${route_id_oi}:

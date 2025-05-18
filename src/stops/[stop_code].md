@@ -5,6 +5,7 @@ toc: false
 
 ```js
 import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, generateStatsTable, formatSecondsForStatsTable, source_domain, md} from '../lib/helpers.js'
+import {plot_wait_times} from '../lib/charts.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
 
 const level_of_detail = Generators.input(level_of_detail_input)
@@ -66,37 +67,11 @@ Plot.plot({
 ```
 
 ```js
-const wait_times_cutoff_min = 45
-
-const wait_times_plot = (stop_times.filter(d => d.s_until_next_arrival !== null && (d.s_until_next_arrival / 60) < wait_times_cutoff_min).length > 0) ? Plot.plot({
+plot_wait_times({
+    stop_times,
     title: `How long do you have to wait for your next train / bus at ${stop_name_pretty}?`,
-    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than ${wait_times_cutoff_min} minutes), previous schedule vs. NWTB`,
-    width,
-    x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
-    y: {label: "Percentage (%)", percent: true, grid: true},
-	color: {domain: source_domain},
-    marks: [
-        Plot.rectY(stop_times.map(label_schedules), Plot.binX({y: "proportion-facet"}, {
-            x: "s_until_next_arrival",
-            fill: "source",
-            fx: "source",
-            interval: 5 * 60, // we format from seconds to minutes, so do the equivalent here
-            domain: [0, wait_times_cutoff_min * 60],
-            tip: {
-                pointer: "x",
-                format: {
-                    fx: false,
-                    fill: false,
-                }
-            }
-        })),
-        Plot.axisFx({label: "Schedule"})
-    ]
-}) : html`<figure><h2>How long do you have to wait for your next train / bus at ${stop_name_pretty}?</h2><em>All wait times are longer than ${wait_times_cutoff_min} minutes. (Otherwise, there’d be a chart here.)</em></figure>`
-```
-
-```js
-wait_times_plot
+    width
+})
 ```
 
 Here are key measures for wait times at ${stop_name_pretty}:
@@ -190,35 +165,11 @@ Plot.plot({
 ```
 
 ```js
-const route_wait_times_plot = (st_oi.filter(d => d.s_until_next_arrival !== null && (d.s_until_next_arrival / 60) < wait_times_cutoff_min).length > 0) ? Plot.plot({
+plot_wait_times({
+    stop_times: st_oi,
     title: `How long do you have to wait for the next ${route_oi.route_id} (${route_oi.direction}) at ${stop_name_pretty}?`,
-    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than ${wait_times_cutoff_min} minutes), previous schedule vs. NWTB`,
-    width,
-    x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
-    y: {label: "Percentage (%)", percent: true, grid: true},
-	color: {domain: source_domain},
-    marks: [
-        Plot.rectY(st_oi.map(label_schedules), Plot.binX({y: "proportion-facet"}, {
-            x: "s_until_next_arrival",
-            fill: "source",
-            fx: "source",
-            interval: 5 * 60, // we format from seconds to minutes, so do the equivalent here
-            domain: [0, wait_times_cutoff_min * 60],
-            tip: {
-                pointer: "x",
-                format: {
-                    fx: false,
-                    fill: false,
-                }
-            }
-        })),
-        Plot.axisFx({label: "Schedule"})
-    ]
-}) : html`<figure><h2>How long do you have to wait for your next train / bus from your selected route at ${stop_name_pretty}?</h2><em>All wait times are longer than ${wait_times_cutoff_min} minutes. (Otherwise, there’d be a chart here.)</em></figure>`
-```
-
-```js
-route_wait_times_plot
+    width
+})
 ```
 
 Here are key measures for wait times for the ${route_id_oi} (${route_oi.direction}) at ${stop_name_pretty}:

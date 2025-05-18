@@ -7,6 +7,7 @@ toc: false
 ```js
 import {to_pct, ch_incr_decr, label_service_windows, label_schedules, label_route_ids, source_domain} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
+import {plot_wait_times} from '../lib/charts.js'
 import {wards} from '../lib/maps.js'
 
 const level_of_detail = Generators.input(level_of_detail_input)
@@ -119,30 +120,10 @@ Plot.plot({
 ```
 
 ```js
-Plot.plot({
-    title: `How long do you have to wait for your next train / bus at your selected stops?`,
-    subtitle: `Distribution of wait times in five-minute increments (cuts off at waits longer than 45 minutes), previous schedule vs. NWTB`,
-    width,
-    x: {label: "Wait time (minutes)", transform: d => Math.round(d/60)},
-    y: {label: "Percentage (%)", percent: true, grid: true},
-    color: {legend: true, domain: source_domain},
-    marks: [
-        Plot.rectY(stop_times_oi.map(label_schedules), Plot.binX({y: "proportion-facet"}, {
-            x: "s_until_next_arrival",
-            fill: "source",
-            fx: "source",
-            interval: 5 * 60, // we format from seconds to minutes, so do the equivalent here
-            domain: [0, 45 * 60],
-            tip: {
-                pointer: "x",
-                format: {
-                    fx: false,
-                    fill: false,
-                }
-            }
-        })),
-        Plot.axisFx({label: "Schedule"})
-    ]
+plot_wait_times({
+    stop_times: stop_times_oi,
+    title: `How long do you have to wait for your next train / bus at your selected stop(s)?`,
+    width
 })
 ```
 
