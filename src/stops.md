@@ -53,5 +53,10 @@ ${stop_table}
 
 ```js
 const stops_raw = await FileAttachment('./data/octranspo.com/stops_normalized.parquet').parquet()
-const stops = stops_raw.toArray().map(label_stop_url)
+const stops = stops_raw.toArray()
+    .map(s => ({
+        stop_code: s.stop_code,
+        stop_name_normalized: s.stop_name_normalized
+    }))
+    .map(label_stop_url)
 ```

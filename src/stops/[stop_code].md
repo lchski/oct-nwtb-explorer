@@ -105,6 +105,10 @@ ${generateStatsTable(stop_times, 's_until_next_arrival', formatSecondsForStatsTa
 
 This plot and table show _all_ the wait times at ${stop_name_pretty}. If multiple routes serve the stop, see below for details by route.
 
+
+***
+
+
 ## Routes at ${stop_name_pretty}
 
 <div class="grid grid-cols-2">
@@ -139,7 +143,7 @@ md`${routes_at_stop_summary
 ## Select a route that stops at ${stop_name_pretty}
 
 ```js
-const route_oi = view(Inputs.select(routes_at_stop, {
+const route_oi = view(Inputs.select(routes_at_stop, {// TODO add null options back to this, so we don't automatically render everything
     label: "Route",
     format: (r) => `${r.route_id}: ${r.direction}`
 }))
