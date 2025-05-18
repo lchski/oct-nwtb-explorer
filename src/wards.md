@@ -34,47 +34,35 @@ ${service_period_desc}
 </div>
 
 ```js
-const stops_by_ward_plot = Plot.plot({
-    title: `How many stops are there by ward?`,
-    subtitle: "Counts how many stops are active during selected service windows, previous schedule vs. NWTB",
-    marginLeft: 250,
-    marginBottom: 40,
-    y: {axis: null, label: "Schedule"},
-    fy: {label: "Ward"},
-    x: {label: "Number of stops", grid: true},
-    color: {legend: true, domain: source_domain},
-    style: {
-        fontSize: '1em',
-    },
-    marks: [
-        Plot.rectX(stop_times,
-            {
-                x: "n_stops",
-                y: "source",
-                fy: "ward",
-                fill: "source",
-                tip: {
-                    pointer: "y",
-                    format: {
-                        fx: false,
-                        fill: false,
-                    }
-                }
-            }
-        )
-    ]
+const stops_by_ward_plot = plot_ward_comparison({
+    title: `How many stops are there, by ward?`,
+    subtitle_qualifier: "stops are active",
+    x_config: {label: "Number of stops"},
+    comparison_property: "n_stops"
+})
+
+const arrivals_by_ward_plot = plot_ward_comparison({
+    title: `How many arrivals, by ward?`,
+    subtitle_qualifier: "times buses or trains arrive",
+    x_config: {label: "Arrival frequency", tickFormat: "s"},
+    comparison_property: "n_stop_times"
 })
 ```
 
 ```js
-const arrivals_by_ward_plot = Plot.plot({
-    title: `How many arrivals, by ward?`,
-    subtitle: "Counts how many times buses or trains arrive during selected service windows, previous schedule vs. NWTB",
+const plot_ward_comparison = ({
+    title = "How many TKTK, by ward?",
+    subtitle_qualifier = "TKTK",
+    x_config,
+    comparison_property
+}) => Plot.plot({
+    title,
+    subtitle: `Counts how many ${subtitle_qualifier} during selected service windows, previous schedule vs. NWTB`,
     marginLeft: 250,
     marginBottom: 40,
     y: {axis: null, label: "Schedule"},
     fy: {label: "Ward"},
-    x: {label: "Arrival frequency", tickFormat: "s", grid: true},
+    x: {label: "TKTK", grid: true, ...x_config},
     color: {legend: true, domain: source_domain},
     style: {
         fontSize: '1em',
@@ -82,7 +70,7 @@ const arrivals_by_ward_plot = Plot.plot({
     marks: [
         Plot.rectX(stop_times,
             {
-                x: "n_stop_times",
+                x: comparison_property,
                 y: "source",
                 fy: "ward",
                 fill: "source",
