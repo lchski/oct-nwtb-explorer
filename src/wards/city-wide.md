@@ -3,7 +3,7 @@ theme: [light, wide]
 ---
 
 ```js
-import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules, source_domain} from '../lib/helpers.js'
+import {to_pct, ch_incr_decr, summ_diff, label_service_windows, label_wards, label_schedules, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
 
 const level_of_detail = Generators.input(level_of_detail_input)
@@ -37,7 +37,7 @@ During the service period you’ve selected above, ${ward_oi.name} has:
 - ${stop_times_per_stop.filter(s => s.source === 'current').length.toLocaleString()} stops active in the previous schedule
 - ${stop_times_per_stop.filter(s => s.source === 'new').length.toLocaleString()} stops active in the new schedule
 
-Buses or trains arrive at these stops ${stop_times_oi_summary.new.n.toLocaleString()} times in the new schedule.
+Buses or trains arrive at these stops ${stop_times.filter(st => st.source === "new").length.toLocaleString()} times in the new schedule.
 
 ```js
 Plot.plot({
@@ -67,34 +67,12 @@ Plot.plot({
 })
 ```
 
-
-```js
-const wait_time_summary = {
-    current: {
-        min: Math.round(d3.min(stop_times_oi_current, d => d.s_until_next_arrival) / 60),
-        max: Math.round(d3.max(stop_times_oi_current, d => d.s_until_next_arrival) / 60),
-        mean: Math.round(d3.mean(stop_times_oi_current, d => d.s_until_next_arrival) / 60),
-        median: Math.round(d3.median(stop_times_oi_current, d => d.s_until_next_arrival / 60))
-    },
-    new: {
-        min: Math.round(d3.min(stop_times_oi_new, d => d.s_until_next_arrival) / 60),
-        max: Math.round(d3.max(stop_times_oi_new, d => d.s_until_next_arrival) / 60),
-        mean: Math.round(d3.mean(stop_times_oi_new, d => d.s_until_next_arrival) / 60),
-        median: Math.round(d3.median(stop_times_oi_new, d => d.s_until_next_arrival / 60))
-    }
-}
-```
-
 <div class="grid grid-cols-2">
     <div>
 
 Here are key measures for wait times in ${ward_oi.name} (in minutes):
 
-Measure   | Previous     | New
----------- | ------------ | ----------
-Range   | ${wait_time_summary.current.min} to ${wait_time_summary.current.max} | ${wait_time_summary.new.min} to ${wait_time_summary.new.max}
-Mean   | ${wait_time_summary.current.mean} | ${wait_time_summary.new.mean} (${summ_diff(wait_time_summary.current.mean, wait_time_summary.new.mean)})
-Median   | ${wait_time_summary.current.median} | ${wait_time_summary.new.median} (${summ_diff(wait_time_summary.current.median, wait_time_summary.new.median)})
+${generateStatsTable(stop_times, 's_until_next_arrival', formatSecondsForStatsTable)}
 
 </div>
     <div class="tip" style="height: fit-content">These numbers are affected by the service options you make above (e.g., weekday, Saturday, Sunday)—change those to see how your service numbers change!</div>
@@ -108,7 +86,7 @@ const stop_times_oi_per_stop_above_cutoff = stop_times_per_stop.filter(s => s.n_
 
 ```js
 Plot.plot({
-    title: `How often do buses or trains arrive at stops in ${ward_oi.name}?`,
+    title: `How busy are stops in ${ward_oi.name}?`,
     subtitle: `Histogram of how many times buses or trains arrive at each stop, previous schedule vs. NWTB (cut off at ${stop_times_oi_cutoff}, see below)`,
     width,
     x: {label: "Arrival frequency"},
@@ -139,13 +117,13 @@ _The histogram cuts off ${stop_times_oi_per_stop_above_cutoff.filter(s => s.sour
 
 Here are key measures for arrival frequency at stops in ${ward_oi.name}:
 
-Measure   | Previous     | New
----------- | ------------ | ----------
-Range   | ${stop_times_oi_per_stop_summary_current.min} to ${stop_times_oi_per_stop_summary_current.max} | ${stop_times_oi_per_stop_summary_new.min} to ${stop_times_oi_per_stop_summary_new.max}
-Mean   | ${stop_times_oi_per_stop_summary_current.mean} | ${stop_times_oi_per_stop_summary_new.mean} (${summ_diff(stop_times_oi_per_stop_summary_current.mean, stop_times_oi_per_stop_summary_new.mean)})
-Median   | ${stop_times_oi_per_stop_summary_current.median} | ${stop_times_oi_per_stop_summary_new.median} (${summ_diff(stop_times_oi_per_stop_summary_current.median, stop_times_oi_per_stop_summary_new.median)})
+${generateStatsTable(stop_times_per_stop, 'n_stop_times', d => Math.round(d))}
 
-_A mean value of ${stop_times_oi_per_stop_summary_new.mean} indicates that the average stop in ${ward_oi.name} has ${stop_times_oi_per_stop_summary_new.mean} arrivals during the service period you’ve selected above. Some stops will have more frequent arrivals, and others less frequent, as indicated by the range value._
+```js
+const st_per_stop_new_mean = Math.round(d3.mean(stop_times_per_stop.filter(st => st.source === 'new'), d => d.n_stop_times))
+```
+
+_A mean value of ${st_per_stop_new_mean} indicates that the average stop in ${ward_oi.name} has ${st_per_stop_new_mean} arrivals during the service period you’ve selected above. Some stops will have more frequent arrivals, and others less frequent, as indicated by the range value._
 
 ```js
 Plot.plot({
@@ -239,51 +217,6 @@ GROUP BY
     source,
     stop_code
 `)]
-
-const stop_times_oi_current = stop_times.filter(st => st.source === "current")
-const stop_times_oi_new = stop_times.filter(st => st.source === "new")
-
-let stop_times_oi_summary = {
-    current: {
-		n: stop_times_oi_current.length,
-	},
-	new: {
-		n: stop_times_oi_new.length,
-	},
-}
-
-stop_times_oi_summary = {
-    current: {
-		...stop_times_oi_summary.current,
-	},
-	new: {
-		...stop_times_oi_summary.new,
-		n_change: stop_times_oi_summary.new.n - stop_times_oi_summary.current.n,
-	}
-}
-
-stop_times_oi_summary = {
-    current: {
-		...stop_times_oi_summary.current,
-	},
-	new: {
-		...stop_times_oi_summary.new,
-        pct_change: to_pct(stop_times_oi_summary.new.n_change / stop_times_oi_summary.current.n)
-	}
-}
-
-const stop_times_oi_per_stop_summary = aq.from(stop_times_per_stop)
-    .groupby('source')
-    .rollup({
-        min: d => aq.op.min(d.n_stop_times),
-        max: d => aq.op.max(d.n_stop_times),
-        mean: d => Math.round(aq.op.mean(d.n_stop_times)),
-        median: d => Math.round(aq.op.median(d.n_stop_times)),
-    })
-    .objects()
-
-const stop_times_oi_per_stop_summary_current = stop_times_oi_per_stop_summary.find(d => d.source === 'current')
-const stop_times_oi_per_stop_summary_new = stop_times_oi_per_stop_summary.find(d => d.source === 'new')
 ```
 
 ```js

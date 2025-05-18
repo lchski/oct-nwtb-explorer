@@ -41,7 +41,7 @@ During the service period you’ve selected above, ${ward_oi.name} has:
 - ${stop_times_per_stop.filter(s => s.source === 'current').length.toLocaleString()} stops active in the previous schedule
 - ${stop_times_per_stop.filter(s => s.source === 'new').length.toLocaleString()} stops active in the new schedule
 
-Buses or trains arrive at these stops ${stop_times_oi_summary.new.n.toLocaleString()} times in the new schedule.
+Buses or trains arrive at these stops ${stop_times.filter(st => st.source === "new").length.toLocaleString()} times in the new schedule.
 
 ```js
 Plot.plot({
@@ -90,7 +90,7 @@ const stop_times_oi_per_stop_above_cutoff = stop_times_per_stop.filter(s => s.n_
 
 ```js
 Plot.plot({
-    title: `How often do buses or trains arrive at stops in ${ward_oi.name}?`,
+    title: `How busy are stops in ${ward_oi.name}?`,
     subtitle: `Histogram of how many times buses or trains arrive at each stop, previous schedule vs. NWTB (cut off at ${stop_times_oi_cutoff}, see below)`,
     width,
     x: {label: "Arrival frequency"},
@@ -263,40 +263,6 @@ const stop_times_per_stop = aq.from(
     .rollup({ n_stop_times: d => aq.op.sum(d.n_stop_times) })
     .orderby('stop_code', 'source')
     .objects()
-```
-
-```js
-const stop_times_oi_current = stop_times.filter(st => st.source === "current")
-const stop_times_oi_new = stop_times.filter(st => st.source === "new")
-
-let stop_times_oi_summary = {
-    current: {
-		n: stop_times_oi_current.length,
-	},
-	new: {
-		n: stop_times_oi_new.length,
-	},
-}
-
-stop_times_oi_summary = {
-    current: {
-		...stop_times_oi_summary.current,
-	},
-	new: {
-		...stop_times_oi_summary.new,
-		n_change: stop_times_oi_summary.new.n - stop_times_oi_summary.current.n,
-	}
-}
-
-stop_times_oi_summary = {
-    current: {
-		...stop_times_oi_summary.current,
-	},
-	new: {
-		...stop_times_oi_summary.new,
-        pct_change: to_pct(stop_times_oi_summary.new.n_change / stop_times_oi_summary.current.n)
-	}
-}
 ```
 
 ```js
