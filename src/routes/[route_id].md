@@ -108,12 +108,128 @@ plot_arrival_frequencies({
 ```
 
 
+## Route directions
+
+This route goes in multiple directions.
+
+
+
+```js
+const route_directions = aq.from(stop_times)
+    .groupby('source', 'direction_id', 'trip_headsign')
+    .count()
+    .orderby('source', 'direction_id', aq.desc('count'))
+    .groupby('source', 'direction_id')
+    .rollup({
+        direction: d => aq.op.join(aq.op.array_agg_distinct(d.trip_headsign), ', '),
+        n_arrivals: d => aq.op.sum(d.count)
+    })
+    .orderby('source', 'direction_id')
+    .objects()
+
+const route_directions_select = aq.from(route_directions)
+    .derive({
+        direction: d => d.source === 'current' ? `p: ${d.direction}` : `n: ${d.direction}`
+    })
+    .groupby('direction_id')
+    .rollup({
+        direction: d => aq.op.join(aq.op.array_agg_distinct(d.direction), ' — ')
+    })
+    .orderby('direction_id')
+    .objects()
+
+const rd_p = route_directions.filter(rd => rd.source === 'current')
+const rd_n = route_directions.filter(rd => rd.source === 'new')
+
+const rd_0 = route_directions.filter(rd => rd.direction_id == 0)
+const rd_1 = route_directions.filter(rd => rd.direction_id == 1)
+```
+
+```js
+const rd_oi = view(Inputs.select(route_directions_select, {
+    label: "Route direction",
+    format: x => x.direction
+}))
+```
+
+```js
+const rd_oi_labels = {
+    p: rd_p.find(rd => rd.direction_id === rd_oi.direction_id).direction,
+    n: rd_n.find(rd => rd.direction_id === rd_oi.direction_id).direction
+}
+
+const label_st_oi_rd = (row) => {
+    const newRow = { ...row };
+	
+	switch (newRow.source) {
+		case 'current':
+            newRow.source = `2019–2025 (previous): ${rd_oi_labels.p}`;
+            break;
+		case 'new':
+            newRow.source = `new: ${rd_oi_labels.n}`;
+    		break;
+	}
+	
+	return newRow;
+}
+```
+
+```js
+const flip_map_orientation_rd = view(Inputs.toggle({label: "Flip map orientation (can help with wide / long routes)"}))
+```
+
+```js
+map_stop_times({
+    title: `How often does the ${route_id_oi} stop across its route?`,
+    subtitle: `Direction: ${rd_oi.direction}`,
+    width,
+    map_control_stub: {
+        ward: {
+            id: 'city'
+        },
+        roads: 4
+    },
+    stop_times: st_oi.map(label_st_oi_rd),
+    stops,
+    orientation_input: flip_map_orientation_rd,
+    basemap_components: await get_basemap_components()
+})
+```
+
+```js
+plot_wait_times({
+    stop_times: st_oi,
+    title: `How long do you have to wait for the ${route_id_oi}?`,
+    width
+})
+```
+
+Here are key measures for wait times for the ${route_id_oi} in your selected direction (${rd_oi.direction}):
+
+${generateStatsTable(st_oi, 's_until_next_arrival', formatSecondsForStatsTable)}
+
+
+```js
+plot_arrival_frequencies({
+    st_oi,
+    title: `How do arrival frequencies for the ${route_id_oi} differ across service windows?`,
+    subtitle_qualifier: "on this route",
+    width: Math.max(width, 550)
+})
+```
+
+
+
 <!-- Loading -->
 
 
 ```js
 const stop_times_raw = await FileAttachment(`../data/generated/routes/stop_times/${observable.params.route_id}.parquet`).parquet()
 const stop_times = stop_times_raw.toArray().filter(d => selected_service_windows(level_of_detail).includes(d.service_window) && selected_service_ids(level_of_detail).includes(d.service_id))
+```
+
+```js
+const st_oi = stop_times.filter(st => st.direction_id === rd_oi.direction_id)
 ```
 
 ```js

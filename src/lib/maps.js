@@ -85,6 +85,7 @@ export async function get_basemap_components() {
 
 export const map_stop_times = ({
 	title = "TKTK?",
+	subtitle = null,
 	width,
 	domain = null,
 	map_control_stub = {
@@ -99,6 +100,7 @@ export const map_stop_times = ({
 	basemap_components
 }) => Plot.plot({
 	title,
+	subtitle,
 	width,
 	projection: {
 		type: "mercator",
