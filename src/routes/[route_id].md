@@ -129,20 +129,20 @@ const route_directions = aq.from(stop_times)
 
 const route_directions_select = aq.from(route_directions)
     .derive({
-        direction: d => d.source === 'current' ? `p: ${d.direction}` : `n: ${d.direction}`
+        direction: d => d.source === 'current' ? `p: ${d.direction}` : `n: ${d.direction}`,
+        direction_wordy: d => d.source === 'current' ? `previous schedule: ${d.direction}` : `new schedule: ${d.direction}`
     })
     .groupby('direction_id')
     .rollup({
-        direction: d => aq.op.join(aq.op.array_agg_distinct(d.direction), ' — ')
+        direction: d => aq.op.join(aq.op.array_agg_distinct(d.direction), ' — '),
+        direction_wordy: d => aq.op.join(aq.op.array_agg_distinct(d.direction_wordy), ' — ')
     })
     .orderby('direction_id')
     .objects()
+```
 
-const rd_p = route_directions.filter(rd => rd.source === 'current')
-const rd_n = route_directions.filter(rd => rd.source === 'new')
-
-const rd_0 = route_directions.filter(rd => rd.direction_id == 0)
-const rd_1 = route_directions.filter(rd => rd.direction_id == 1)
+```js
+// TODO: https://github.com/lchski/oct-nwtb-explorer/issues/14
 ```
 
 ```js
@@ -153,35 +153,13 @@ const rd_oi = view(Inputs.select(route_directions_select, {
 ```
 
 ```js
-const rd_oi_labels = {
-    p: rd_p.find(rd => rd.direction_id === rd_oi.direction_id).direction,
-    n: rd_n.find(rd => rd.direction_id === rd_oi.direction_id).direction
-}
-
-const label_st_oi_rd = (row) => {
-    const newRow = { ...row };
-	
-	switch (newRow.source) {
-		case 'current':
-            newRow.source = `2019–2025 (previous): ${rd_oi_labels.p}`;
-            break;
-		case 'new':
-            newRow.source = `new: ${rd_oi_labels.n}`;
-    		break;
-	}
-	
-	return newRow;
-}
-```
-
-```js
 const flip_map_orientation_rd = view(Inputs.toggle({label: "Flip map orientation (can help with wide / long routes)"}))
 ```
 
 ```js
 map_stop_times({
-    title: `How often does the ${route_id_oi} stop across its route?`,
-    subtitle: `Direction: ${rd_oi.direction}`,
+    title: `How often does the ${route_id_oi} stop across its route, for the selected direction?`,
+    subtitle: `(selected direction, ${rd_oi.direction_wordy})`,
     width,
     map_control_stub: {
         ward: {
@@ -189,7 +167,7 @@ map_stop_times({
         },
         roads: 4
     },
-    stop_times: st_oi.map(label_st_oi_rd),
+    stop_times: st_oi,
     stops,
     orientation_input: flip_map_orientation_rd,
     basemap_components: await get_basemap_components()
@@ -199,7 +177,7 @@ map_stop_times({
 ```js
 plot_wait_times({
     stop_times: st_oi,
-    title: `How long do you have to wait for the ${route_id_oi}?`,
+    title: `How long do you have to wait for the ${route_id_oi}, for the selected direction?`,
     width
 })
 ```
@@ -211,9 +189,9 @@ ${generateStatsTable(st_oi, 's_until_next_arrival', formatSecondsForStatsTable)}
 
 ```js
 plot_arrival_frequencies({
-    st_oi,
-    title: `How do arrival frequencies for the ${route_id_oi} differ across service windows?`,
-    subtitle_qualifier: "on this route",
+    stop_times: st_oi,
+    title: `How do arrival frequencies for the ${route_id_oi} differ across service windows, for the selected direction?`,
+    subtitle_qualifier: "on this route, for the selected direction,",
     width: Math.max(width, 550)
 })
 ```
