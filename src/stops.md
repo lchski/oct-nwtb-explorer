@@ -31,11 +31,11 @@ const stop_table = Inputs.table(stop_search, {
         stop_url: "Link"
     },
     format: {
-        stop_url: x => html`<a href="${x}">Explore</a>`
+        stop_url: x => html`<a href="${x}" title="Explore stop">↗</a>`
     },
     width: {
-        stop_code: 50,
-        stop_url: 50
+        stop_code: 40,
+        stop_url: 30
     },
     sort: "stop_code",
     select: false
