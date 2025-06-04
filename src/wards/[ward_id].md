@@ -54,7 +54,7 @@ plot_wait_times({
 <div class="grid grid-cols-2">
     <div>
 
-Here are key measures for wait times in ${ward_oi.name} (in minutes):
+Here are key measures for wait times in ${ward_oi.name} (in minutes, lower is better):
 
 ${generateStatsTable(stop_times, 's_until_next_arrival', formatSecondsForStatsTable)}
 
@@ -79,7 +79,7 @@ plot_st_per_stop_histogram({
 
 _The histogram cuts off ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'current').length} stop(s) in the previous schedule and ${stop_times_oi_per_stop_above_cutoff.filter(s => s.source === 'new').length} stop(s) in the new schedule where buses or trains arrive more than ${stop_times_oi_cutoff} times during the selected timeframe._
 
-Here are key measures for arrival frequency at stops in ${ward_oi.name}:
+Here are key measures for arrival frequency at stops in ${ward_oi.name} (higher means stops are served more frequently):
 
 ${generateStatsTable(stop_times_per_stop, 'n_stop_times', d => Math.round(d))}
 

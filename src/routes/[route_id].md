@@ -93,7 +93,7 @@ plot_wait_times({
 })
 ```
 
-Here are key measures for wait times for the ${route_id_oi}:
+Here are key measures for wait times for the ${route_id_oi} (in minutes, lower is better):
 
 ${generateStatsTable(stop_times, 's_until_next_arrival', formatSecondsForStatsTable)}
 
@@ -182,7 +182,7 @@ plot_wait_times({
 })
 ```
 
-Here are key measures for wait times for the ${route_id_oi} in your selected direction (${rd_oi.direction}):
+Here are key measures for wait times for the ${route_id_oi} in your selected direction (${rd_oi.direction}) (in minutes, lower is better):
 
 ${generateStatsTable(st_oi, 's_until_next_arrival', formatSecondsForStatsTable)}
 
