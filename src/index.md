@@ -31,17 +31,9 @@ You can explore the new network from a few angles:
     - (Note: we manually added in the [shopper routes](https://www.octranspo.com/en/our-services/bus-o-train-network/service-types/shopper-routes/), even though they wouldn’t all run on April 11 or May 9, so rural service is more accurately represented.)
 - The “previous” schedule refers to the schedule pre-April 27, 2025 (since the [2019 “#ReallyBigServiceChange”](https://www.cbc.ca/news/canada/ottawa/bus-changes-lrt-ottawa-october-six-1.5304675)), while “new” refers to the NWTB schedule.
 
-## If a page crashes
-
-This is a prototype, meant to show what’s possible with OC Transpo’s schedule data—and to help us understand the scope of this change! There’s a lot of data and number crunching going on, and it may crash at times (especially on phones). 
-
-First, I apologize! 
-
-Second, if you’re able, please [send me a note](https://lucascherkewski.com/contact/) describing what happened. I’ll be happy to try to improve it.
-
 ## Thank you
 
-Thanks for checking this out! I hope it helps you make sense of how this change affects not only you, but your neighbours throughout the city.
+Thanks for checking this out! I hope it helps you make sense of how this change affects not only you, but your neighbours throughout the city. If you’d like to, you can [learn how the site works](/about/methodology), [download the supporting data](/about/data), or [learn about me](/about/author) (I’m Lucas, hi!).
 
 
 [^stop]: We use “arrival” to avoid the very confusing “how many stops [do trains or buses make] at this stop”. English, what a language!
