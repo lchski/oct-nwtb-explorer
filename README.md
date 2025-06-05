@@ -26,7 +26,7 @@ For more, see <https://observablehq.com/framework>.
 
 ## Data
 
-To reproduce the build, you’ll need data. I haven’t fully written up how to pull that together yet—see #22 for an outline.
+To reproduce the build, you’ll need data. I haven’t fully written up how to pull that together yet—see [#22](https://github.com/lchski/oct-nwtb-explorer/issues/22) for an outline.
 
 ## Project structure
 
