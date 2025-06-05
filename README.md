@@ -1,5 +1,7 @@
 # NWTB Explorer
 
+## Running the code
+
 This is an [Observable Framework](https://observablehq.com/framework/) app. To install the required dependencies, run:
 
 ```
@@ -12,48 +14,33 @@ Then, to start the local preview server, run:
 npm run dev
 ```
 
-Then visit <http://localhost:3000> to preview your app.
+Then visit <http://localhost:3000> to preview the app.
 
-For more, see <https://observablehq.com/framework/getting-started>.
+To build, run:
+
+```
+npm run clean && npm run build
+```
+
+For more, see <https://observablehq.com/framework>.
+
+## Data
+
+To reproduce the build, you’ll need data. I haven’t fully written up how to pull that together yet—see #22 for an outline.
 
 ## Project structure
 
-A typical Framework project looks like this:
+Key files for the site:
 
 ```ini
 .
 ├─ src
-│  ├─ components
-│  │  └─ timeline.js           # an importable module
 │  ├─ data
-│  │  ├─ launches.csv.js       # a data loader
-│  │  └─ events.json           # a static data file
-│  ├─ example-dashboard.md     # a page
-│  ├─ example-report.md        # another page
-│  └─ index.md                 # the home page
-├─ .gitignore
-├─ observablehq.config.js      # the app config file
-├─ package.json
-└─ README.md
+│  │  ├─ generated/            # data files output (see scripts/)
+│  │  └─ octranspo.com/        # for-web output files (see https://github.com/lchski/octranspo-new-ways-to-bus-data/)
+│  │  └─ ottawa.ca/            # GIS files (see src/about/data.md)
+│  ├─ lib/                     # JS files reused across the site
+│  └─ **/*.md                  # pages of the site
+├─ scripts/                    # outputs additional data for wards, routes, and stops
+└─ observablehq.config.js      # notably, controls parameterized routes used for much of the site (see https://observablehq.com/framework/params)
 ```
-
-**`src`** - This is the “source root” — where your source files live. Pages go here. Each page is a Markdown file. Observable Framework uses [file-based routing](https://observablehq.com/framework/project-structure#routing), which means that the name of the file controls where the page is served. You can create as many pages as you like. Use folders to organize your pages.
-
-**`src/index.md`** - This is the home page for your app. You can have as many additional pages as you’d like, but you should always have a home page, too.
-
-**`src/data`** - You can put [data loaders](https://observablehq.com/framework/data-loaders) or static data files anywhere in your source root, but we recommend putting them here.
-
-**`src/components`** - You can put shared [JavaScript modules](https://observablehq.com/framework/imports) anywhere in your source root, but we recommend putting them here. This helps you pull code out of Markdown files and into JavaScript modules, making it easier to reuse code across pages, write tests and run linters, and even share code with vanilla web applications.
-
-**`observablehq.config.js`** - This is the [app configuration](https://observablehq.com/framework/config) file, such as the pages and sections in the sidebar navigation, and the app’s title.
-
-## Command reference
-
-| Command           | Description                                              |
-| ----------------- | -------------------------------------------------------- |
-| `npm install`            | Install or reinstall dependencies                        |
-| `npm run dev`        | Start local preview server                               |
-| `npm run build`      | Build your static site, generating `./dist`              |
-| `npm run deploy`     | Deploy your app to Observable                            |
-| `npm run clean`      | Clear the local data loader cache                        |
-| `npm run observable` | Run commands like `observable help`                      |
