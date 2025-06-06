@@ -3,7 +3,7 @@ theme: [light, wide]
 ---
 
 ```js
-import {label_schedules, generateStatsTable, formatSecondsForStatsTable, source_domain} from '../lib/helpers.js'
+import {label_schedules, generateStatsTable, formatSecondsForStatsTable, source_domain, ch_incr_decr, to_pct} from '../lib/helpers.js'
 import {service_period_desc, level_of_detail_input, selected_service_windows, selected_service_ids} from '../lib/controls.js'
 import {plot_wait_times, plot_arrival_frequencies, plot_st_per_stop_histogram} from '../lib/charts.js'
 import {map_stop_times, get_basemap_components, wards} from '../lib/maps.js'
@@ -37,11 +37,21 @@ ${service_period_desc}
 
 ## Focus on the ward
 
+```js
+const st_p = stop_times.filter(st => st.source === "current")
+const st_n = stop_times.filter(st => st.source === "new")
+```
+
 During the service period you’ve selected above, ${ward_oi.name} has:
 - ${stop_times_per_stop.filter(s => s.source === 'current').length.toLocaleString()} stops active in the previous schedule
 - ${stop_times_per_stop.filter(s => s.source === 'new').length.toLocaleString()} stops active in the new schedule
 
-Buses or trains arrive at these stops ${stop_times.filter(st => st.source === "new").length.toLocaleString()} times in the new schedule.
+During this period, buses and trains:
+
+- previously arrived ${st_p.length.toLocaleString()} times
+- now arrive ${st_n.length.toLocaleString()} times (${ch_incr_decr(st_n.length - st_p.length, true)}${Math.abs(st_n.length - st_p.length).toLocaleString()}, a ${to_pct((st_n.length - st_p.length) / st_p.length)}% change)
+
+Buses or trains arrive at these stops  times in the new schedule.
 
 ```js
 plot_wait_times({
