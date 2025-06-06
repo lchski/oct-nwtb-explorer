@@ -51,8 +51,6 @@ During this period, buses and trains:
 - previously arrived ${st_p.length.toLocaleString()} times
 - now arrive ${st_n.length.toLocaleString()} times (${ch_incr_decr(st_n.length - st_p.length, true)}${Math.abs(st_n.length - st_p.length).toLocaleString()}, a ${to_pct((st_n.length - st_p.length) / st_p.length)}% change)
 
-Buses or trains arrive at these stops  times in the new schedule.
-
 ```js
 plot_wait_times({
     stop_times,
