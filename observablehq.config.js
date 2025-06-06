@@ -31,7 +31,6 @@ export default {
         {name: "Wards (including city-wide)", path: "/wards"},
         {name: "Routes", path: "/routes"},
         {name: "Stops", path: "/stops"},
-        {name: "Maps", path: "/maps"},
       ]
     },
     {

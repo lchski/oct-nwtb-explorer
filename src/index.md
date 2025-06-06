@@ -15,7 +15,10 @@ You can explore the new network from a few angles:
 - [by ward](/wards) (including a city-wide summary)
 - [by routes](/routes)
 - [by stops](/stops)
-- [by maps](/maps) _(this one might break on phones or other less powerful devices—there’s a lot of math going on! the wards and routes pages have simpler maps)_
+
+For any of those pages, you can adjust the numbers, charts, and maps displayed based on the “service date“ (weekday, Saturday, or Sunday) and “service window” (time of day).
+
+_There are also a few [experimental map visualizations](/maps). That page might break on phones or other less powerful devices—there’s a lot of math going on! The wards and routes pages have maps, too, that should work more broadly._
 
 ## Key terms
 

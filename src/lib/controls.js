@@ -19,15 +19,15 @@ export const service_ids = [
 
 export const level_of_detail_input = Inputs.form({
 	// schedule: Inputs.select(["current", "new"], {label: "schedule version"}),
-	service_windows: Inputs.select(service_windows, {
-		multiple: true,
-		format: (w) => w.label,
-		label: "service window(s) (blank for all)"
-	}),
 	service_ids: Inputs.select(service_ids, {
 		multiple: true,
 		label: "service date(s) (blank for all)",
 		value: ["weekday"]
+	}),
+	service_windows: Inputs.select(service_windows, {
+		multiple: true,
+		format: (w) => w.label,
+		label: "service window(s) (blank for all)"
 	}),
 })
 
