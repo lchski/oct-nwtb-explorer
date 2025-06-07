@@ -5,7 +5,7 @@
     "clean": "rimraf src/.observablehq/cache",
     "build": "observable build > /dev/null",
     "dev": "observable preview",
-    "deploy": "netlify deploy --dir=dist --prod",
+    "deploy": "netlify deploy --no-build --dir=dist --prod",
     "observable": "observable"
   },
   "dependencies": {
